@@ -1,0 +1,495 @@
+% \VignetteIndexEntry{Differential Expression Meta-Analysis with DExMA package}
+% \VignetteKeywords{Gene Expression, Meta-analysis}
+% \VignettePackage{DExMA}
+
+\documentclass{article}
+<<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
+BiocStyle::latex()
+@
+
+\usepackage[utf8]{inputenc}
+
+\bioctitle[DExMA package]{Differential Expression Meta-Analysis with DExMA package}
+\author[1,2]{Juan Antonio Villatoro-García}
+\author[1,2]{Pedro Carmona-Sáez\thanks{\email{pedro.carmona@genyo.es}}}
+\affil[1]{Department of Statistics and Operational Research. University of Granada}
+\affil[2]{Bioinformatics Unit. GENYO, Centre for Genomics and Oncological Research, }
+
+\begin{document}
+\SweaveOpts{concordance=FALSE}
+\maketitle
+
+\begin{abstract}
+\noindent \textbf{DExMA} (Differential Expression Meta-Analysis) performs all the  neccessary steps of differential expression meta-analysis, without eliminating those genes that are presented in at least a certain proportion of datasets. In addition, it allows to apply quality controls, download GEO datasets and show a graphical representation of the results.
+\end{abstract}
+
+packageVersion{\Sexpr{BiocStyle::pkg_ver("DExMA")}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\textbf{DExMA} is a package designed to perform gene expression meta-analysis. Gene expression meta-analysis comprises a set of methods that  combine the results of several differential expression studies  into a single common result \cite{Toro:2020}. Furthermore, this package has the advantage that it allows to takes into account those genes  that are  contained in at least a certain proportion (set by the user) of datasets, instead of using only those genes that are common to all the studies. The use of only the genes common to all the datasets could lead to the loss of some genes that are not measured in a single study, which would lead to the loss of information. Due to this fact, \textbf{DExMA} package is very useful to work with  Microarray data, because this type of data is what usually produces the existence of uncommon genes between datasets with different annotations. However, previously normalized RNA-Seq data can also be used, as well as, both Microarray data and normalized RNA-Seq data at the same time.
+
+\textbf{DExMA} package has implemented methods from the three main types of  gene expression meta-analysis \cite{Toro:2020} meta-analysis based on effects sizes combination and meta-analysis based on p-values combination. Once one of the methods has been  applied, \textbf{DExMA} package  provides a specific and adapted results table. Moreover, this package contains some functions that allows the  user to carry out a previous quality control in order to results obtained are more reliable. Finally, this package provides some additional function that,  for example, help the user to download public Microarray data from NCBI GEO  public database \cite{Barret:2013} or to visualize the significant genes  in a heatmap.
+
+This document  gives a tutorial-style introduction to all the steps that must be carry out in order to properly perform gene expression meta-analysis by making use of \textbf{DExMA} package.
+
+\section{Previous steps: Meta-analysis object}
+
+\textbf{DExMA} uses a specific object as input, which is a list of 
+nested lists where each nested list corresponds 
+to a study. This object can be created directly by the users or they can use 
+\emph{createObjectMA()} function to create it.
+
+For the examples that are going to be shown, synthetic data will be 
+used. We load the sample data into our R session.
+
+<<echo=TRUE, include=FALSE>>=
+library(DExMA)
+data("DExMAExampleData")
+@
+
+\begin{itemize}
+    \item listMatrixEX: a list of four expression arrays
+    \item listPhenodatas: a list of the four phenodata corresponding to the four expression arrays
+    \item listExpression: a list of four ExpressionSets object. It contains the same information as listMatrixEX and listPhenodatas
+    \item ExpressionSetStudy5: an ExpressionSet object similar to the
+    ExpressionSets objects of listExpression.
+    \item maObjectDif: the meta-analysis object created from the listMatrixEX and listPhenodatas objects.
+    \item maObject: the meta-analysis object after setting all the studies in Official Gene Symbol annotation
+\end{itemize}
+
+
+
+
+\subsection{Meta-analysis object creation (objectMA)}
+
+As previously stated, the meta-analysis input in DExMA is a list of nested 
+lists. Each nested list contains two elements:
+
+\begin{itemize}
+    \item A gene expression matrix with genes in rows and samples in columns 
+    \item A vector of 0 and 1 indicating the group of each sample. 0 represents reference group (usually controls) and 1 represents experimental group (usually cases).
+\end{itemize}
+
+This object can be created directly by the user or we can make use of  \emph{createObjectMA()} function,  which creates the *objectMA* after indicating how the reference and  experimental groups are identified.
+
+\emph{createObjectMA()} function allows to create the object needed to perform meta-analysis. In this case, it is necessary to indicate  as input of the function the variables that contain the experimental and  reference groups:
+
+\begin{itemize}
+    \item listEX: a list of dataframes or matrix (genes in rows and samples in columns). A list of ExpressionSets can be used too:
+
+<<>>=
+#List of expression matrices
+data("DExMAExampleData")
+ls(listMatrixEX)
+head(listMatrixEX$Study1)
+
+#List of ExpressionSets
+ls(listExpressionSets)
+listExpressionSets$Study1
+@
+
+    \item listPheno: a list of phenodatas (samples in rows and covariables in columns). If the object listEX is a list of ExpressionSets this element can be null.
+
+<<>>=
+data("DExMAExampleData")
+#Example of a phenodata object
+ls(listPhenodatas)
+listPhenodatas$Study1
+@
+    \item namePheno: a list or vector of the different column names or column positions from the pheno used for perfoming the comparison between groups. Each element of namePheno correspont to its equivalent element in the listPheno. (default a vector of 1, all the first columns of each elements of listPheno are selected)
+    \item expGroups: a list or vector of the group names or positions from namePheno variable used as experimental group (cases) to perform the comparison (default a vector of 1, all the first groups are selected).
+    \item refGroups: a list or vector of the group names or positions from namePheno variable used as reference group (controls) to perform the comparison (default a vector of 2, all the second groups are selected).
+\end{itemize}
+
+It is important to note that if any element does not belong to the experimental or the reference group, that sample is not taken into account in the creation of meta-analysis object.
+
+Here, we have included an example to show how exactly the function is used:
+
+Since this function can be a bit complicated if there are many datasets, we  recommend creating a vector to keep the column names of the phenodatas that contains the variable that identifies  the groups to compare (\emph{namePheno} argument).  Moreover, we should create two others lits to indicate how to identify  experimental (cases) and reference (controls) groups in these variables (\emph{expGroups} and \emph{refGroups} arguments).
+
+If we look at the example phenodatas list we have the following four objects:
+
+<<>>=
+listPhenodatas$Study1
+@
+
+In the "Study1" phenoData, the groups variable is "condition". Experimental  group is named as "Diseased" and reference group as "Healthy".
+
+
+<<>>=
+listPhenodatas$Study2
+@
+
+In the "Study2" phenoData, the groups variable is "condition". Experimental  group  is named as "Diseased" or "ill" and reference group as "Healthy"  or "control"
+
+<<>>=
+listPhenodatas$Study3
+@
+
+
+
+In the "Study3" phenoData, the groups variable is "state". Experimental group is named as "Diseased" and reference group as "Healthy".
+
+<<>>=
+listPhenodatas$Study4
+@
+
+In this phenoData, the groups variable is "state". Experimental group is named as "ill" and reference group as "control".
+
+We all this information we can create the vector for \emph{namePheno} argument and the two list for \emph{expGroups} and \emph{refGroups}:
+
+<<>>=
+phenoGroups = c("condition", "condition", "state", "state")
+phenoCases = list(Study1 = "Diseased", Study2 = c("Diseased", "ill"),
+                    Study3 = "Diseased", Study4 = "ill")
+phenoControls = list(Study1 = "Healthy", Study2 = c("Healthy", "control"),
+                    Study3 = "Healthy", Study4 = "control")
+@
+
+Then, we can apply more easily \emph{createObjectMA()} function:
+
+<<>>=
+newObjectMA <- createObjectMA(listEX=listMatrixEX,
+                                listPheno = listPhenodatas,
+                                namePheno=phenoGroups,
+                                expGroups=phenoCases, 
+                                refGroups = phenoControls)
+#Study 1
+head(newObjectMA[[1]][[1]])
+newObjectMA[[1]][[2]]
+#Study 2
+head(newObjectMA[[2]][[1]])
+newObjectMA[[2]][[2]]
+@
+
+The result obtained is the proper object to perform meta-analysis (objectMA).
+
+
+\subsection{Adding a new dataset to the meta-analysis object}
+
+It may happen that once the meta-analysis object is created we want to add a new dataset before doing the meta-analysis. \textbf{DExMA} provides the \emph{elementObjectMA()} function, which allows the creation of an element ofthe meta-analysis object. This function contains the following arguments:
+
+\begin{itemize}
+    \item expressionMatrix: a dataframe or matrix that contanining genes in rows and samples in columns. An ExpressionSet object  can be used too.
+    \item pheno: a data frame or a matrix containing samples in rows and  covariates in columns. If NULL (default), pheno is extracted from the ExpressionSet object
+    \item groupPheno: the column name or position from pheno where experimental group (cases) and reference group (control) are identified
+    \item expGroups: a vector of the names or positions from groupPheno variable used as experimental group (cases). By default the first group (character) is taken
+    \item refGroups: a vector of the names or positions from groupPheno variable used as reference group (control). By default the second group (character) is taken.
+\end{itemize}
+
+As with the \emph{createObjectMA()} function, if any element does not belong to the experimental or the reference group, that sample is not included in the creation of the object.
+
+Here we provided an example of the use of this function, in which we create an  element of the meta-analysis object from the information of the "\emph{Study 2}" of the \emph{listExpressionSets} object:
+
+<<echo=TRUE, include=FALSE>>=
+data("DExMAExampleData")
+ExpressionSetStudy5
+library(Biobase)
+pData(ExpressionSetStudy5)
+@
+
+We had to load \Biocpkg{Biobase} package in order to the information in the \emph{ExpressionSet}. In the phenoData we can observe that groups variable is "condition". In addition,  Experimental group  is name as "Diseased" or "ill" and reference group as "Healthy" or "control"
+
+<<>>=
+newElem <-elementObjectMA(expressionMatrix = ExpressionSetStudy5,
+                            groupPheno = "condition",
+                            expGroup = c("Diseased", "ill"),
+                            refGroup = c("Healthy", "control"))
+head(newElem[[1]])
+head(newElem[[2]])
+@
+
+
+As we can see, we obtain a list that has the same structure as the elements of  the meta-analysis object (\emph{objectMA}). This new element can be added to a \emph{objectMA} that has been created previously:
+
+
+<<>>=
+newObjectMA2 <- newObjectMA
+newObjectMA2[[5]] <- newElem
+head(newObjectMA2[[5]][[1]])
+newObjectMA2[[5]][[2]]
+@
+
+
+Moreover, an advantage of this function is that it can be used to create one by one all the elements and finally join all of them to create the meta-analysis object.
+
+\section{Performing Meta-analysis}
+
+\textbf{DExMA} package contains the main gene expression meta-analysis 
+methods:
+\begin{itemize}
+    \item Meta-analysis based on effect size combination: Fixed Effects Model (FEM) and Random Effects Model (REM). 
+    \item Meta-analysis based on P-value combination: Fisher's method, Stouffer's method, Wilkonson's method (maxP) and Tippet's method (minP).
+\end{itemize}
+
+These methods can be applied directly, but it is advisable to apply 
+some previous \textbf{DExMA} function to ensure the results are accurate.
+
+\subsection{Gene annotation and quality controls}
+
+Before performing the meta-analysis, all the genes must be in the same annotation and a quality control should be done in order to obtain reliable results \cite{Toro:2020}. \textbf{DExMA} provides some useful functions to help the user to do it.
+
+\subsubsection{Setting all the datasets in the same annotation}
+
+All genes must be in the same annotation in order to perform the meta-analysis successfully and avoid incorrect interpretations of the results. In cases  where all datasets do not have the same ID, \textbf{DExMA} contains a function called \emph{allSameID()} that allows to convert all the annotations to a homogeneous Gene Symbol annotation. Moreover, if they are annotated in Gene Symbol, the function itself will check if the annotation is correct. The inputs of this function are:
+
+\begin{itemize}
+    \item \emph{objectMA}: the meta-analysis object of \textbf{DExMA} package. The result obtained by \emph{createObjectMA()} function should be used.
+    \item  \emph{ids}:  a character vector with the current annotation of each dataset. Use \emph{availableIDs} function to see the annotations admitted. 
+    \item  \emph{organism}: a character that indicates the organism that the datasets belong to. Use \emph{avaliableOrganism} function to see the organism admitted.
+\end{itemize}
+
+Here we include an example of how to use this function. In this example we have used "newObjectMA" that has been created before. The first two  expression arrays are annotated in "entrez", the third expression matrix in  "Official Gene Symbol" and the last one in "Official Gene Symbol" with some  synonyms:
+
+<<>>=
+rownames(newObjectMA$Study1$mExpres)[1:20]
+rownames(newObjectMA$Study2$mExpres)[1:20]
+rownames(newObjectMA$Study3$mExpres)[1:20]
+rownames(newObjectMA$Study4$mExpres)[1:20]
+@
+
+
+We can use \emph{avaliableIDs} and \emph{avaliableOrganism} in order to know how to write in the function the ids vector and the organism:
+
+<<>>=
+head(avaliableIDs)
+avaliableOrganism
+@
+
+We create the ids vector:
+
+<<>>=
+annotations <-  c("Entrez","Entrez", "Genesymbol", "Genesymbol")
+@
+
+
+Then, we are ready to run the \emph{allSameID()} function:
+
+<<>>=
+newObjectMA <- allSameID(newObjectMA, ids = annotations,
+                        organism = "Homo sapiens")
+rownames(newObjectMA$Study1$mExpres)[1:20]
+rownames(newObjectMA$Study2$mExpres)[1:20]
+rownames(newObjectMA$Study3$mExpres)[1:20]
+rownames(newObjectMA$Study4$mExpres)[1:20]
+@
+
+
+As it can be seen, all the studies are now annotated in Official Gene Symbol.
+
+\subsubsection{Logarithm transformation}
+
+To avoid problems with the returned fold-change  by the meta-analysis, $log_{2}$ should be applied to the gene expression values. We can make use of \emph{dataLog()} function to check if each dataset expression values have the $log_{2}$ applied already. If not, the function will make the transformation:
+
+<<>>=
+newObjectMA <- dataLog(newObjectMA)
+head(newObjectMA[[1]][[1]])
+@
+
+\subsubsection{Heterogeneity study}
+
+Some heterogeneity between studies may lead to some methods, such as the  Fixed Effects Model, not providing reliable results. Therefore, it is advisable to carry out a study of  heterogeneity to correctly choose the meta-analysis method \cite{Toro:2020}. The \emph{heterogeneityTest()} function shows two ways of measuring heterogeneity.
+
+On the one hand, it returns a QQ-plot of the Cochran's test \cite{Higgins:2002}. In this plot, if most of the values are close to the central line, that is, most of the Cochran's test values are close to the expected distribution (chi-squared distribution), it can be said that there is homogeneity. In the case that these values deviate greatly from the expected distribution, it must be assumed that there is heterogeneity.
+
+On the other hand, $I^{2}$ measures the percentage of variation across studies due to heterogeneity \cite{I2:2003}. In the case of gene expression data, an $I^{2}$ for each gene across datasets would have to be calculated.  As in the case of many genes, it can be difficult to observe all the $I^{2}$  values obtained, the \emph{heterogeneityTest()} function returns the quantiles of the different $I^{2}$ values calculated. $I^{2}$ values equal to 0 indicate homogeneity and values less than 0.25 are usually categorized as low heterogeneity \cite{I2:2003}. Therefore, to assume homogeneity in the gene expression 
+meta-analysis, almost all $I_{2}$ values must be 0 or at least less than 0.25.
+
+In the example shown below, it is observed that in the QQ-plot of the  Cochran's test, Q-values deviate considerably from the expected distribution and approximately 10\% of the $I^{2}$ values are greater than 0.25,  therefore homogeneity could not be assumed.
+
+<<fig=TRUE>>=
+heterogeneityTest(newObjectMA)
+@
+
+\subsection{Performing meta-analysis: \emph{metaAnalysisDE()}}
+
+The \emph{metaAnalysisDE()} function allows to perform a meta-analysis in only one step, needing only the meta-analysis object created previously. 
+
+This function has as input: 
+\begin{itemize}
+    \item objectMA: The meta-analysis object of DExMA package. The result obtained by \emph{createObjectMA} function should be used.
+    \item typeMethod: a character that indicates the method to be performed:
+    \begin{itemize}
+        \item "FEM": Fixed Effects model.
+        \item "REM": Random Effects model.
+        \item "Fisher": Fisher's method (sum of logarithms of p-values)
+        \item "Stouffer": Stouffer's method (sum of z-scores)
+        \item "maxP": Wilkinson's method (maximun of p-values)
+        \item "minP": Tippet's method (minimun of p-values)
+    \end{itemize}
+    \item missAllow: a number between 0 and 1 that indicates the maximum proportion of missing values allows in a sample. If the sample has more proportion of missing values, the sample will be eliminated. In the other case, the missing values will be imputed by using the K-NN algorithm included in \Biocpkg{impute} package \cite{Impute:2019}.
+    \item proportionData: a number between 0 and 1 that indicates the minimum proportion of datasets in which a gene must be contained to be included.
+    \item Adjusted p-value from which a gene is considered significant. Default 0.05.  This value only takes you into account in the results generated in rank combination methods.
+\end{itemize}
+
+In the following example, we have applied a Random Effect model to the \emph{DExMA} object ("newObjectMA") we have been working with so far. In addition we have allowed a 0.3 proportion of missing values in a sample and a gene must have been contained in at least the 75\% of studies.
+
+<<>>=
+resultsMA <- metaAnalysisDE(newObjectMA, typeMethod="REM",
+                            missAllow=0.3, proportionData=0.75)
+@
+
+The output of this function is a dataframe with the results of the meta-analysis where rows are the genes and columns are the different variables provided by the meta-analysis:
+
+<<>>=
+head(resultsMA)
+@
+
+The variables of the dataframe change from one type of meta-analysis to another. A more detailed explanation of these results will be addressed in the following sections.
+
+\subsubsection{Effects size combination results}
+
+The "FEM" and "REM" methods provide a dataframe with the variables:
+\begin{itemize}
+    \item Com.ES: combined effect of the gene.
+    \item ES.var: variance of the combined effect of the gene.
+    \item Qval: total variance of the gene.
+    \item Qpval:p-value for the total variance of the gene.
+    \item tau2: between-study variance of the gene.
+    \item zval: combined effect value for a standard normal. I can be use in order to find out if the gene is overexpressed (positive value) or underexpressed (negative value).
+    \item Pval: P-value of the meta-analysis for the gene.
+    \item FDR: P-value adjusted of the meta-analysis for the gene.
+    \item Prop.dataset: Proportion of the datasets in which the gene is included.
+\end{itemize}
+
+<<>>=
+resultsES <- metaAnalysisDE(newObjectMA, typeMethod="REM", proportionData=0.5)
+head(resultsES)
+@
+
+\subsubsection{P-value combination results}
+
+The "Fisher", "Stouffer", "minP" and "maxP" methods provide a dataframe with the  following variables:
+\begin{itemize}
+    \item Stat: Statistical calculated in the method
+    \item Pval: P-value of the meta-analysis for the gene.
+    \item FDR: P-value adjusted of the meta-analysis for the gene.
+    \item AveFC: Average of log Fold-Change values for the gene used in order to find out if the gene is overexpressedd (positive value) or underexpressed (negative value).
+    \item Prop.dataset: Proportion of the datasets in which the gene is included.
+\end{itemize}
+
+Here we present an example making use of "maxP" method:
+
+<<>>=
+resultsPV <- metaAnalysisDE(newObjectMA, typeMethod="maxP", proportionData=0.5)
+head(resultsPV)
+@
+
+
+\subsection{Visualization of the results: heatmap}
+
+Finally, we can represent in a heatmap the significant genes in order to observe how they are expressed in each of the studies. In \emph{makeHeatma()} function we have to include both the object that has been used in the meta-analysis, the result of it and the applied method. In addition, this package offers three different scaling approaches (\textit{scaling}) in order to compare properly thegene expression of the studies in the heatmap:
+
+\begin{itemize}
+    \item "zscor": It calculates a z-score value for each gene, that is, the mean gene expression from each gene is subtracted from each gene expression value and then it is divided by the standard deviation.
+    \item  "swr": Scaling relative to reference dataset approach \cite{Lazar:2013}.
+    \item  "rscale": It uses the rescale function of the \CRANpkg{scales} package to scale the gene expresion \cite{scalesR:2020}.
+    \item "none": no scaling approach is applied.
+\end{itemize}
+Moreover, in \emph{regulation} argument, we can choose if we want to represent the overexpressed or underexpressed genes:
+
+\begin{itemize}
+    \item "up": only up-expressed genes are represented.
+    \item "down: only down-expressed genes are represented
+    \item "all": up-expressed and down-expressed genes are represented.
+\end{itemize}
+We can choose the number of significant genes (\emph{numSig}) that we want to be shown on the graph and the adjusted p-value from which a gene is considered as significant (\emph{fdrSig}). In addition, the genes that are not presented in one sample are represented in gray.
+
+Here we present an example of the heatmap which have been obtained from 
+the result of applying a random effects model to the object "\emph{newObjectMA}" and making use of a "zscor" scaling approach.
+
+<<fig=TRUE>>=
+makeHeatmap(objectMA=newObjectMA, resMA=resultsMA, scaling = "zscor", 
+            regulation = "all", typeMethod="REM", numSig=40)
+@
+
+\section{Additional information}
+\textbf{DExMA} provides some functions which may be useful for the user, although they are not essential to perform meta-analysis.
+
+
+
+\subsection{GEO microarray data download}
+
+In addition to using own user data, DExMA package allows to make use of 
+public microarray data from the NCBI GEO public database \cite{Barret:2013}. 
+For doing that, we can make use of \emph{downloadGEOData()} function. This function uses internally \Biocpkg{GEOquey} package in order to download some files at the same time. This function has an input a character vector 
+(\emph{GEOobject}) with the GEO ID of the different datasets that we want to download and a character (\emph{directory}) that indicates the directory 
+where GSE Series Matrix files \cite{GEOqueryR:2013} are going to
+be stored. Finally, the function returns a list of ExpressionSets objects,
+where each one represents one dataset. Here, we show an example in which we
+are going to download two GEO microarrys datasets:
+
+<<eval=FALSE>>=
+GEOobjects<- c("GSE4588", "GSE10325")
+dataGEO<-downloadGEOData(GEOobjects)
+@
+
+
+Once the download process is completed we get this list of ExpressionSets:
+
+<<echo=FALSE>>=
+load("/home/juanan/Documents/GENYO_JA/Meta_package/DatosGEO/dataGEO.rda")
+@
+
+<<>>=
+dataGEO
+@
+
+This list can be used as input of \emph{createObjectMA()} function.
+
+\subsection{Using RNA-Seq data}
+
+\textbf{DExMA} internally uses \Biocpkg{limma} package in order to assess differential expression. Therefore, RNA-Seq data must be previously normalized by the user in order to be able to include correctly theses data in the gene-expression meta-analysis. Since \Biocpkg{limma} is used internally, we recommend to apply the steps described in the limma user's guide for the RNA-Seq data normalization \cite{limmaR:2020}, although the users can use the type of normalization they prefer.
+
+\subsection{Removing Batch Effects}
+
+Before the creation of the \emph{objectMA}, a batch effect correction can be applied in order to reduce the effect of covariates that may be affecting to gene expression \cite{Toro:2020}. Firstly, with function \emph{seeCov()},  which internally contains the \emph{prince()} and \emph{prince.plot()} functions of the \CRANpkg{swamp} package \cite{swampR:2019}, we can obtain a visualization of the p-values of each principal component associated with the categorical covariates. This allows to check which categorical variables are the ones that are most affecting the expression:
+
+
+<<fig=TRUE>>=
+seeCov(listMatrixEX$Study2, listPhenodatas$Study2)
+@
+
+The categorical variables that may be causing a batch effect can be corrected by using the \emph{removeBatch()} function. The input of this function is the expression matrix and the phenodata. In addition , We also have to add a formula with the variables for which we want to correct the gene expression and the name of the variable that contains the cases and controls groups. Finally, if there is a covariate inside the formula that we want to give greater importance, we will have the option to indicate in the function (\emph{mainCov()}). Here we show an example in which we have corrected the gene expression of the previous study by two of their covariates:
+
+<<fig=TRUE>>=
+listMatrixEX$Study2 <- batchRemove(listMatrixEX$Study2, listPhenodatas$Study2, 
+                                    formula=~gender+race, 
+                                    mainCov = "race", nameGroup="condition")
+head(listMatrixEX$Study2)
+@
+
+
+\subsection{Calculating Effects size}
+
+The \emph{calculateES()} function returns the effects size in each of the studies. Moreover, it calculates the variance of each of the effects and the proportion of datasets that contain the gene. The effects size are calculated by making use of the \emph{Hedges’ g estimator} \cite{Toro:2020}.
+
+<<>>=
+effects <- calculateES(newObjectMA)
+head(effects$ES)
+head(effects$Var)
+@
+
+\subsection{Calculating Individual P-values}
+
+Similar to the calculation of effects sizes, the individual p-values of  each of the studies and the $log_{2}$ fold change of each one can also be  calculated by applying \emph{pvalueIndAnalysis()}. P-value are obtained by assessing differential expression with \Biocpkg{limma} package.
+
+<<>>=
+pvalues <- pvalueIndAnalysis(newObjectMA)
+head(pvalues$p)
+head(pvalues$FC)
+@
+
+\section{Session info}
+
+<<echo=FALSE>>=
+sessionInfo()
+@
+
+\bibliography{DExMA_refs}
+
+
+\end{document}
