@@ -43,7 +43,7 @@ allSameID<- function(objectMA, initialIDs, finalID = "GeneSymbol",
     {stop("finalID must an object of class character")}
     if(!(finalID %in% DExMAdata::avaliableIDs)){
         stop("finalID not available")}
-    for (j in 1:length(initialIDs)){
+    for (j in seq_len(length(initialIDs))){
         if(!(initialIDs[j] %in% DExMAdata::avaliableIDs)){
                 stop(initialIDs[j], " not available")}
     }

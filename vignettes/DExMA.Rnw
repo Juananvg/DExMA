@@ -238,7 +238,9 @@ All genes must be in the same annotation in order to perform the meta-analysis s
 
 \begin{itemize}
     \item \emph{objectMA}: the meta-analysis object of \textbf{DExMA} package. The result obtained by \emph{createObjectMA()} function should be used.
-    \item  \emph{ids}:  a character vector with the current annotation of each dataset. Use \emph{availableIDs} function to see the annotations admitted. 
+    \item  \emph{initialIDs}:  a character vector with the current annotation of each dataset. Use \emph{availableIDs} function to see the annotations admitted.
+    \item \emph{finalID}: a character that indicates the final ID that all the 
+    studies will have.
     \item  \emph{organism}: a character that indicates the organism that the datasets belong to. Use \emph{avaliableOrganism} function to see the organism admitted.
 \end{itemize}
 
@@ -252,25 +254,26 @@ rownames(newObjectMA$Study4$mExpres)[1:20]
 @
 
 
-We can use \emph{avaliableIDs} and \emph{avaliableOrganism} in order to know how to write in the function the ids vector and the organism:
+We can use \emph{avaliableIDs} and \emph{avaliableOrganism} in order to know how to write in the function the \emph{initialIDs} vector and the organism:
 
 <<>>=
 head(avaliableIDs)
 avaliableOrganism
 @
 
-We create the ids vector:
+We create the \emph{InitialIDs} vector:
 
 <<>>=
-annotations <-  c("Entrez","Entrez", "Genesymbol", "Genesymbol")
+annotations <-  c("Entrez","Entrez", "GeneSymbol", "GeneSymbol")
 @
 
 
-Then, we are ready to run the \emph{allSameID()} function:
+Then, we are ready to run the \emph{allSameID()} function. We are going to
+annotated all the genes in Official Gene Symbol (\emph{finalID="GeneSymbol"}):
 
 <<>>=
-newObjectMA <- allSameID(newObjectMA, ids = annotations,
-                        organism = "Homo sapiens")
+newObjectMA <- allSameID(newObjectMA, initialIDs = annotations,
+                            finalID="GeneSymbol", organism = "Homo sapiens")
 rownames(newObjectMA$Study1$mExpres)[1:20]
 rownames(newObjectMA$Study2$mExpres)[1:20]
 rownames(newObjectMA$Study3$mExpres)[1:20]
