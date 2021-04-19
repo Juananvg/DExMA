@@ -1,4 +1,4 @@
-#' Set all datasets in the same ID (Official Gene Symbol)
+#' Set all datasets in the same ID (Official Gene Symbol, Entrez or Ensembl)
 #'
 #'
 #' @param objectMA A list of list. Each list contains two elements. The first
@@ -7,13 +7,15 @@
 #' of the different samples of the expression matrix. 0 represents one group
 #' (controls) and 1 represents the other group (cases).
 #' The result of the CreateobjectMA can be used too.
-#' @param ids A vector in which each element indicates the ID of the equivalent
-#' element of listExpMatrix.
-#' To know the avalible ids, you can write avaliableIDs
+#' @param initialIDs A vector in which each element indicates the ID of the 
+#' equivalent element of listExpMatrix.
+#' To know the avalible ids, you can write avaliableIDs.
+#' @param finalID A character that indicates the final ID all the different
+#' studies will have. To know the available ids, you can write avaliableIDs.
 #' @param organism A character that indicates the organism of the data.
 #' To know the avaliable organisms write avaliableOrganism
 #'
-#' @return The same list with all the datasets in Official Gene Symbol
+#' @return The same list with all the datasets in the same selected annotation
 #'
 #' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
 #'
@@ -21,29 +23,38 @@
 #'
 #' @examples
 #' data(DExMAExampleData)
-#' sameData <- allSameID(objectMA = maObject, ids = c("Entrez",
-#' "Entrez", "Genesymbol", "Genesymbol"), organism = "Homo sapiens")
+#' sameData <- allSameID(objectMA = maObjectDif, initialIDs = c("Entrez",
+#' "Entrez", "GeneSymbol", "GeneSymbol"), finalID = "GeneSymbol", 
+#' organism = "Homo sapiens")
 #' sameData
 #'
 #' @export
 
-
-
-allSameID<- function(objectMA, ids, organism="Homo sapiens"){
+allSameID<- function(objectMA, initialIDs, finalID = "GeneSymbol",
+    organism="Homo sapiens"){
     listExpMatrix <- lapply(objectMA, function(l) l[[1]])
-    if(length(listExpMatrix) != length(ids)){
-        stop("objectMA and ids must have the same length")}
+    if(length(listExpMatrix) != length(initialIDs)){
+        stop("objectMA and initialIDs must have the same length")}
     if(!is.list(objectMA)) {stop("objectMA must be a list")}
     if(length(organism) != 1) {stop("Only one organism can be included")}
-    if(!is.character(ids))
-    {stop("ids must an object of class character")}
+    if(!is.character(initialIDs))
+    {stop("initialIDs must an object of class character")}
+    if(!is.character(finalID))
+    {stop("finalID must an object of class character")}
+    if(!(finalID %in% DExMAdata::avaliableIDs)){
+        stop("finalID not available")}
+    for (j in 1:length(initialIDs)){
+        if(!(initialIDs[j] %in% DExMAdata::avaliableIDs)){
+                stop(initialIDs[j], " not available")}
+    }
     k<-length(listExpMatrix)
     newlist <- list(0)
     message("Changing IDs")
     #Progress bar
     pb <- txtProgressBar(min = 0, max = k, style = 3)
     for (i in seq_len(k)) {
-        newlist[[i]]<-.toGeneSymbol(listExpMatrix[[i]], ids[[i]], organism)
+        newlist[[i]]<-.toFinalID(listExpMatrix[[i]], initialIDs[[i]], 
+            finalID, organism)
         #Progress bar upgrade
         setTxtProgressBar(pb, i)
     }
@@ -55,28 +66,26 @@ allSameID<- function(objectMA, ids, organism="Homo sapiens"){
     return(objectMA)
 }
 
-#Function to review gene symbol
-.reviewGeneSymbol <- function(expressionMatrix, tableGeneSymbol, tableSynonyms,
+
+#Function to review GeneSymbol
+.reviewGeneSymbol <- function(expressionMatrix, tableGeneSymbol,
     Organism = c("Bos taurus", 
         "Caenorhabditis elegans",
         "Canis familiaris", "Danio rerio",
         "Drosophila melanogaster",
         "Gallus gallus",
         "Homo sapiens", "Mus musculus",
-        "Rattus norvegicus", "Sus scrofa",
+        "Rattus norvegicus",
         "Arabidopsis thaliana", 
-        "Oryza sativa",
         "Saccharomyces cerevisiae",
-        "Aspergillus nidulans",
         "Escherichia coli"))
 {
     Organism <- match.arg(Organism)
     tableGeneSymbol <- tableGeneSymbol[tableGeneSymbol$Organism == Organism,]
-    tableSynonyms <- tableSynonyms[tableSynonyms$Organism == Organism,]
-    if(sum(rownames(expressionMatrix) %in% tableSynonyms[,1]) >0){
-        tableGeneSymbol <- tableGeneSymbol[tableGeneSymbol[,1] %in%
+    if(sum(rownames(expressionMatrix) %in% tableGeneSymbol[,"Name"]) >0){
+        tableGeneSymbol <- tableGeneSymbol[tableGeneSymbol[,"Name"] %in%
                 rownames(expressionMatrix),]
-        geneSymbols <- unique(tableGeneSymbol[,2])
+        geneSymbols <- unique(tableGeneSymbol[,"GeneSymbol"])
         annotationMatrix <- matrix(NA,
             ncol=ncol(expressionMatrix),
             nrow=(length(geneSymbols)))
@@ -99,23 +108,24 @@ allSameID<- function(objectMA, ids, organism="Homo sapiens"){
     return(expressionMatrix)
 }
 
-
-#Function for change to geneSymbol
-.convertID <- function(expressionMatrix,tableAnnot){
-    tableAnnot <- tableAnnot[tableAnnot[,1] %in% rownames(expressionMatrix),]
-    geneSymbols <- unique(tableAnnot[,2])
+#Function for change the ids in rownames
+.convertID <- function(expressionMatrix, initID, finalID, tableAnnot){
+    tableAnnot <- tableAnnot[tableAnnot[,
+        initID] %in% rownames(expressionMatrix),]
+    finalAnnot <- unique(tableAnnot[,finalID])
     annotationMatrix <- matrix(NA,
         ncol = ncol(expressionMatrix),
-        nrow = (length(geneSymbols)))
-    rownames(annotationMatrix) <- geneSymbols
+        nrow = (length(finalAnnot)))
+    rownames(annotationMatrix) <- finalAnnot
     colnames(annotationMatrix) <- colnames(expressionMatrix)
-    gene <- geneSymbols[1]
-    for (gene in geneSymbols){
-        probes <- as.character(tableAnnot[tableAnnot[,2] == gene,1])
-        if (length(probes)>1){
-            unification<-apply(expressionMatrix[probes,],2, median)
+    gene <- finalAnnot[1]
+    for (gene in finalAnnot){
+        codes <- as.character(
+            unique(tableAnnot[tableAnnot[,finalID] == gene,initID]))
+        if (length(codes)>1){
+            unification<-apply(expressionMatrix[codes,],2, median)
         } else{
-            unification<-expressionMatrix[probes,]
+            unification<-expressionMatrix[codes,]
         }
         annotationMatrix[gene,] <- unification
     }
@@ -123,47 +133,32 @@ allSameID<- function(objectMA, ids, organism="Homo sapiens"){
     return(expressionMatrix)
 }
 
-
-
-.toGeneSymbol <- function(ExpMatrix, id = "Genesymbol",
+#Function that includes both function
+.toFinalID <- function(expressionMatrix, initialID, finalID,
     organism = c("Bos taurus", "Caenorhabditis elegans",
         "Canis familiaris", "Danio rerio",
         "Drosophila melanogaster", 
         "Gallus gallus",
         "Homo sapiens", "Mus musculus",
-        "Rattus norvegicus", "Sus scrofa",
-        "Arabidopsis thaliana", "Oryza sativa",
+        "Rattus norvegicus",
+        "Arabidopsis thaliana",
         "Saccharomyces cerevisiae",
-        "Aspergillus nidulans",
         "Escherichia coli")){
-    if (!any(is.data.frame(ExpMatrix) | is.matrix(ExpMatrix) |
-            class(ExpMatrix)[1] == "ExpressionSet")){
-        
-        stop("Elements of listExpMatrix must be dataframe,
-            matrix or ExpressionSet objects")
-    }
-    if(class(ExpMatrix)[1] == "ExpressionSet"){
-        expressionMatrix <- exprs(ExpMatrix)
-    }
-    else{
-        expressionMatrix <- ExpMatrix
-    }
     organism <- match.arg(organism)
-    annot <- DExMAdata::IDsDExMA[[id]]
-    if(id == "Genesymbol"){
-        newExpMatrix <- .reviewGeneSymbol(expressionMatrix, annot,
-            DExMAdata::SynonymsDExMA, organism)
+    #annot <- DExMAdata::IDsDExMA[[id]]
+    annot <- DExMAdata::IDsDExMA
+    if(initialID == "GeneSymbol"){
+        expressionMatrix <- .reviewGeneSymbol(expressionMatrix, 
+            tableGeneSymbol=DExMAdata::SynonymsDExMA, organism)
     }
     #End of geneSymbol
+    if(initialID==finalID){
+        newExpMatrix <- expressionMatrix
+    }
     else{
-        newExpMatrix <- .convertID(expressionMatrix, annot)
+        newExpMatrix <- .convertID(expressionMatrix, initID=initialID, 
+            finalID=finalID, tableAnnot=annot)
     }
     #Return values
-    if(class(ExpMatrix)[1] == "ExpressionSet"){
-        newData <- ExpressionSet(newExpMatrix)
-        pData(newData) <- pData(ExpMatrix)
-        annotation(newData) <- "Genesymbol"
-    }
-    else{newData <- newExpMatrix}
-    return(newData)
+    return(newExpMatrix)
 }
