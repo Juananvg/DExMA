@@ -8,6 +8,6 @@ License: GPL-2
 Depends: R (>= 4.1), DExMAdata
 Suggests: BiocStyle, qpdf, BiocGenerics, RUnit
 Imports: Biobase, GEOquery, impute, limma, pheatmap, plyr, scales, snpStats, sva, swamp, stats, methods, utils
-biocViews: Microarray, DifferentialExpression, GeneExpression, StatisticalMethod
+biocViews: DifferentialExpression, GeneExpression, StatisticalMethod, QualityControl
 Encoding: UTF-8
 LazyData: false
