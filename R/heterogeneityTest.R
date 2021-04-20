@@ -23,7 +23,8 @@
 #'
 #' @return Deciles of the I^2 values and a QQ-plot of the Cochran's test
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #' 
 #' @references Higgins JPT, Thompson SG. Quantifying heterogeneity in a 
 #' meta-analysis. Stat Med 2002;21:1539–58.

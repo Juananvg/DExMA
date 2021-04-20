@@ -48,5 +48,5 @@ meta-analyses. BMJ 2003;327:557–60.
 \code{\link{createObjectMA}}
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

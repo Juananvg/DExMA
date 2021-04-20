@@ -11,7 +11,8 @@
 #'
 #' @return a list of the different ExpressionSets
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @details This function internally uses getGEO function of GEOquery package. 
 #' However, downloadGEO allows you to download multiple files at the same time

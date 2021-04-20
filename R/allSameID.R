@@ -17,7 +17,8 @@
 #'
 #' @return The same list with all the datasets in the same selected annotation
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{createObjectMA}}
 #'

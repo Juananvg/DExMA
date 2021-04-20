@@ -23,7 +23,8 @@
 #'
 #' @return An element that can be included in meta-analysis object.
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia, 
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{createObjectMA}}
 #'

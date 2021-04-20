@@ -67,5 +67,5 @@ newObjectMA
 \code{\link{elementObjectMA}}
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

@@ -42,5 +42,5 @@ resultsEffects
 \code{\link{createObjectMA}}, \code{\link{metaAnalysisDE}}
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

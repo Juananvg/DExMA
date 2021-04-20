@@ -52,7 +52,8 @@
 #' @return 'NULL'
 #'
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{createObjectMA}}, \code{\link{metaAnalysisDE}}
 #'

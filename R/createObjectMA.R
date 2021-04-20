@@ -32,7 +32,8 @@
 #' matrix. 0 represents reference group (controls) and 1 represents 
 #' experimental group (cases).
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{elementObjectMA}}
 #'

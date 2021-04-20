@@ -37,5 +37,5 @@ R package version 1.5.1. \url{https://CRAN.R-project.org/package=swamp}
 \code{\link{batchRemove}}
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

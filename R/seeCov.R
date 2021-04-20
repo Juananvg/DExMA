@@ -14,7 +14,8 @@
 #' 
 #' @note Requires the package swamp
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia, 
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{batchRemove}}
 #' 

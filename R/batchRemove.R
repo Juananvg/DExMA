@@ -21,7 +21,8 @@
 #' @note For more information of the returned visualization see the 
 #' seeCOV function
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{seeCov}}
 #'

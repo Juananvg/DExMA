@@ -10,7 +10,8 @@
 #'
 #' @return The same object with log-transformed  expression matrix 
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia,
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #' @seealso \code{\link{createObjectMA}}
 #'

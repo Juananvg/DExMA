@@ -90,5 +90,5 @@ Raivo Kolde 2019. pheatmap: Pretty Heatmaps. R package version 1.0.12.
 \code{\link{createObjectMA}}, \code{\link{metaAnalysisDE}}
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

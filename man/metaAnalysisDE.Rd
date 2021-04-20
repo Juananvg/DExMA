@@ -73,5 +73,5 @@ Briefings in Bioinformatics, 2020;, bbaa019,
 Michael Dewey (2020). metap: meta-analysis of significance values.
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

@@ -58,7 +58,8 @@
 #' R package version 1.4
 #' 
 #'
-#' @author Juan Antonio Villatoro Garcia, \email{juan.villatoro@@genyo.es}
+#' @author Juan Antonio Villatoro Garcia, 
+#' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
 #'
 #' @examples

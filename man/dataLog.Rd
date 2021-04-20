@@ -31,5 +31,5 @@ dataLog(maObject)
 \code{\link{createObjectMA}}
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

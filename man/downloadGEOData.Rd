@@ -35,5 +35,5 @@ Gene Expression Omnibus (GEO) and BioConductor.
 Bioinformatics, 2007, 14, 1846-1847
 }
 \author{
-Juan Antonio Villatoro Garcia, \email{juan.villatoro@genyo.es}
+Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }
