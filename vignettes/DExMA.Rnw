@@ -447,7 +447,9 @@ load("/home/juanan/Documents/GENYO_JA/Meta_package/DatosGEO/dataGEO.rda")
 dataGEO
 @
 
-This list can be used as input of \emph{createObjectMA()} function.
+This list can be used as input of \emph{createObjectMA()} function, although it
+is advisable to homogenize gene annotation, in case the genes IDs are not
+Entrez, Official Gene Symbol or Ensembl.
 
 \subsection{Using RNA-Seq data}
 
