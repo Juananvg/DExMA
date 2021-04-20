@@ -14,7 +14,8 @@ of the different samples of the expression matrix. 0 represents one group
 The result of the CreateobjectMA can be used too.}
 
 \item{initialIDs}{A vector in which each element indicates the ID of the 
-equivalent element of listExpMatrix. To know the avalible ids, you can write avaliableIDs}
+equivalent element of listExpMatrix. To know the avalible ids, you can write
+avaliableIDs}
 
 \item{finalID}{A character that indicates the final ID all the different
 studies will have. To know the available ids, you can write avaliableIDs.}
@@ -23,7 +24,7 @@ studies will have. To know the available ids, you can write avaliableIDs.}
 To know the avaliable organisms write avaliableOrganism}
 }
 \value{
-The same list with all the datasets in the same selected ID.
+The same list with all the datasets in the same selected gene ID.
 }
 \description{
 Set all datasets in the 

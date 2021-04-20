@@ -234,12 +234,17 @@ Before performing the meta-analysis, all the genes must be in the same annotatio
 
 \subsubsection{Setting all the datasets in the same annotation}
 
-All genes must be in the same annotation in order to perform the meta-analysis successfully and avoid incorrect interpretations of the results. In cases  where all datasets do not have the same ID, \textbf{DExMA} contains a function called \emph{allSameID()} that allows to convert all the annotations to a homogeneous Gene Symbol annotation. Moreover, if they are annotated in Gene Symbol, the function itself will check if the annotation is correct. The inputs of this function are:
+All genes must be in the same annotation in order to perform the meta-analysis successfully and avoid incorrect interpretations of the results. In cases where 
+all datasets do not have the same gene ID, \textbf{DExMA} contains a function 
+called \emph{allSameID()} that allows to annotated all the datasets with the 
+same gene ID.
+Specifically, the function allows to annotate those datasets that use the 
+Official Gene Symbol, Entrez or Ensembl. The inputs of this function are:
 
 \begin{itemize}
     \item \emph{objectMA}: the meta-analysis object of \textbf{DExMA} package. The result obtained by \emph{createObjectMA()} function should be used.
     \item  \emph{initialIDs}:  a character vector with the current annotation of each dataset. Use \emph{availableIDs} function to see the annotations admitted.
-    \item \emph{finalID}: a character that indicates the final ID that all the 
+    \item \emph{finalID}: a character that indicates the final gene ID that all the 
     studies will have.
     \item  \emph{organism}: a character that indicates the organism that the datasets belong to. Use \emph{avaliableOrganism} function to see the organism admitted.
 \end{itemize}
@@ -269,7 +274,8 @@ annotations <-  c("Entrez","Entrez", "GeneSymbol", "GeneSymbol")
 
 
 Then, we are ready to run the \emph{allSameID()} function. We are going to
-annotated all the genes in Official Gene Symbol (\emph{finalID="GeneSymbol"}):
+annotated all the datasets in Official Gene Symbol 
+(\emph{finalID="GeneSymbol"}):
 
 <<>>=
 newObjectMA <- allSameID(newObjectMA, initialIDs = annotations,
