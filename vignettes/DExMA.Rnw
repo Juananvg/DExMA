@@ -426,29 +426,16 @@ In addition to using own user data, DExMA package allows to make use of
 public microarray data from the NCBI GEO public database \cite{Barret:2013}. 
 For doing that, we can make use of \emph{downloadGEOData()} function. This function uses internally \Biocpkg{GEOquey} package in order to download some files at the same time. This function has an input a character vector 
 (\emph{GEOobject}) with the GEO ID of the different datasets that we want to download and a character (\emph{directory}) that indicates the directory 
-where GSE Series Matrix files \cite{GEOqueryR:2013} are going to
-be stored. Finally, the function returns a list of ExpressionSets objects,
-where each one represents one dataset. Here, we show an example in which we
-are going to download two GEO microarrys datasets:
+where GSE Series Matrix files \cite{GEOqueryR:2013} are going to be stored.
 
 <<eval=FALSE>>=
 GEOobjects<- c("GSE4588", "GSE10325")
 dataGEO<-downloadGEOData(GEOobjects)
 @
 
-
-Once the download process is completed we get this list of ExpressionSets:
-
-<<echo=FALSE>>=
-load("/home/juanan/Documents/GENYO_JA/Meta_package/DatosGEO/dataGEO.rda")
-@
-
-<<>>=
-dataGEO
-@
-
+Once the download process is completed, we get a list of ExpressionSets.
 This list can be used as input of \emph{createObjectMA()} function, although it
-is advisable to homogenize gene annotation, in case the genes IDs are not
+is advisable to homogenize gene annotation, in case genes IDs are not
 Entrez, Official Gene Symbol or Ensembl.
 
 \subsection{Using RNA-Seq data}
