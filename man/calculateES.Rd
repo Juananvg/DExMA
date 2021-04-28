@@ -19,12 +19,14 @@ will be imputed using the K-NN algorithm.}
 }
 \value{
 A list formed by three elements:
-First element (ES) is a dataframe were columns are each of the studies
+\itemize{
+\item First element (ES) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe represents
 the Effect Size.
-Second element (Var) is a dataframe were columns are each of the studies
+\item Second element (Var) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe represents
 the variance of the Effect size.
+}
 }
 \description{
 This function uses the Hedges'g estimator to calulate the different Effects

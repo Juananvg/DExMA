@@ -19,11 +19,13 @@ will be imputed using the K-NN algorithm.}
 }
 \value{
 A list formed by two elements:
-- First element (p) is a dataframe were columns are each of the studies
+\itemize{
+\item First element (p) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe represents
 the p-value.
-- Second element (FC) is a dataframe were columns are each of the studies
-(datasets) and rows are the genes. Each element of the dataframe the logFC.
+\item Second element (FC) is a dataframe were columns are each of the studies
+(datasets) and rows are the genes. Each element of the dataframe is the logFC.
+}
 }
 \description{
 This function uses t-test based on limma package in other to obtain the
