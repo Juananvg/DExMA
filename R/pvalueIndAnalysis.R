@@ -17,13 +17,13 @@
 #'
 #'
 #' @return A list formed by two elements:
-#' - First element (p) is a dataframe were columns are each of the studies
+#' \itemize{
+#' \item{First element (p) is a dataframe were columns are each of the studies
 #' (datasets) and rows are the genes. Each element of the dataframe represents
-#' the p-value.
-#' - Second element (FC) is a dataframe were columns are each of the studies
-#' (datasets) and rows are the genes. Each element of the dataframe the logFC.
-#'
-#'
+#' the p-value.}
+#' \item{Second element (FC) is a dataframe were columns are each of the studies
+#' (datasets) and rows are the genes. Each element of the dataframe the logFC.}
+#'}
 #' @author Juan Antonio Villatoro Garcia,
 #' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
