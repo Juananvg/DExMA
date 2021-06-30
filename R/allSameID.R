@@ -110,27 +110,21 @@ allSameID<- function(objectMA, initialIDs, finalID = "GeneSymbol",
 }
 
 #Function for change the ids in rownames
-.convertID <- function(expressionMatrix, initID, finalID, tableAnnot){
+.convertID <- function(expressionMatrix, initID, finalID, tableAnnot, 
+    organism){
     tableAnnot <- tableAnnot[tableAnnot[,
         initID] %in% rownames(expressionMatrix),]
-    finalAnnot <- unique(tableAnnot[,finalID])
-    annotationMatrix <- matrix(NA,
-        ncol = ncol(expressionMatrix),
-        nrow = (length(finalAnnot)))
-    rownames(annotationMatrix) <- finalAnnot
-    colnames(annotationMatrix) <- colnames(expressionMatrix)
-    gene <- finalAnnot[1]
-    for (gene in finalAnnot){
-        codes <- as.character(
-            unique(tableAnnot[tableAnnot[,finalID] == gene,initID]))
-        if (length(codes)>1){
-            unification<-apply(expressionMatrix[codes,],2, median)
-        } else{
-            unification<-expressionMatrix[codes,]
-        }
-        annotationMatrix[gene,] <- unification
-    }
-    expressionMatrix <- annotationMatrix
+    tableAnnot <- subset(tableAnnot, tableAnnot$Organism == organism)
+    tableAnnot <- tableAnnot[,c(initID, finalID)]
+    genes <- rownames(expressionMatrix)
+    mEx <- cbind(genes, data.frame(expressionMatrix))
+    annotMatrix <- merge(tableAnnot, mEx, by.x = initID, by.y = 1)
+    annotMatrix <- annotMatrix[!duplicated(annotMatrix[,c(1,2)]),]
+    annotMatrix <-annotMatrix[,-which(colnames(annotMatrix)==initID)]
+    agregMatrix <- aggregate(annotMatrix[,-1], by = list(annotMatrix[,finalID]), 
+        FUN = median, simplify = TRUE, drop = TRUE)
+    rownames(agregMatrix) <- agregMatrix[,1]
+    expressionMatrix <- as.matrix(agregMatrix[,-1])
     return(expressionMatrix)
 }
 
@@ -158,7 +152,7 @@ allSameID<- function(objectMA, initialIDs, finalID = "GeneSymbol",
     }
     else{
         newExpMatrix <- .convertID(expressionMatrix, initID=initialID, 
-            finalID=finalID, tableAnnot=annot)
+            finalID=finalID, tableAnnot=annot, organism=organism)
     }
     #Return values
     return(newExpMatrix)
