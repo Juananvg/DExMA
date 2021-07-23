@@ -23,6 +23,9 @@
 #' the p-value.}
 #' \item{Second element (FC) is a dataframe were columns are each of the studies
 #' (datasets) and rows are the genes. Each element of the dataframe the logFC.}
+#' \item{Third element (weights_z) is a dataframe were columns are each of the 
+#' studies (datasets) and rows are the genes.  Each element of the dataframe 
+#' represents the necessary weights for Stouffer's method.}
 #'}
 #' @author Juan Antonio Villatoro Garcia,
 #' \email{juanantoniovillatorogarcia@@gmail.com}
@@ -86,9 +89,34 @@ pvalueIndAnalysis <- function(objectMA, missAllow=0.3){
     names(storeP) <- names(objectMA)
     fc <- .matrixmerge(storeF)
     p <- .matrixmerge(storeP)
-    resultP <- list(p = p, FC = fc)
+    weights_z <- .calW(objectMA)
+    resultP <- list(p = p, FC = fc, weights_z = weights_z)
     return(resultP)
 }
+
+
+# #Function for calculating Weights
+.calW <- function(x){
+    K <- length(x)
+    if(is.null(names(x))){
+        names(x) <- paste("Study", seq_len(K), sep="")
+    }
+    pesos <- list(0) 
+    ## Store the weights
+    for(k in seq_len(K)){
+        M <- matrix(0, ncol = 1, nrow = nrow(x[[k]][[1]]))
+        for (i in seq_len(nrow(M))){
+            M[i,1] <- sqrt(length(x[[k]][[1]][i,]))
+        }
+        rownames(M) <- rownames(x[[k]][[1]])
+        colnames(M) <- names(x)[k]
+        pesos[[k]] <- M
+    }
+    WS <- .matrixmerge(pesos)
+    return(WS)
+}
+
+
 
 
 #FUNCTION FOR MERGING MATRIX TAKING INTO ACCOUNT MISSING ROWS

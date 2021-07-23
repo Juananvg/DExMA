@@ -25,6 +25,9 @@ A list formed by two elements:
 the p-value.
 \item Second element (FC) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe is the logFC.
+\item Third element (weights_z) is a dataframe were columns are each of the 
+studies (datasets) and rows are the genes.  Each element of the dataframe 
+represents the necessary weights for Stouffer's method.
 }
 }
 \description{
