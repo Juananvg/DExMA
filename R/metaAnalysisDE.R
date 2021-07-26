@@ -206,7 +206,7 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
         temp <- switch(metaMethod[i], maxP = {.getMaxP(p)},
             minP = {.getMinP(p)},
             Fisher = {.getFisher(p)},
-            Stouffer = {.getStouffer(p)})
+            Stouffer = {.getStouffer(resultP)})
         meta.res$stat[,i] <- temp$stat
         meta.res$pval[,i] <- temp$pval
         meta.res$FDR[,i] <- temp$FDR
@@ -263,47 +263,31 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
 }
 
 ## STOUFFER
-# #Function for calculating Weights
-.calW <- function(x){
-    K <- length(x)
-    if(is.null(names(x))){
-        names(x) <- paste("Study", seq_len(K), sep="")
-    }
-    pesos <- list(0) 
-    ## Store the weights
-    for(k in seq_len(K)){
-        M <- matrix(0, ncol = 1, nrow = nrow(x[[k]][[1]]))
-        for (i in seq_len(nrow(M))){
-            M[i,1] <- sqrt(length(x[[k]][[1]][i,]))
-        }
-        rownames(M) <- rownames(x[[k]][[1]])
-        colnames(M) <- names(x)[k]
-        pesos[[k]] <- M
-    }
-    WS <- .matrixmerge(pesos)
-    return(WS)
-}
-
 ## Function to obtain the statistic
-.sumzp<-function (p, weights=NULL){
-    noweights <- is.null(weights)
-    if (noweights)
-        weights <- rep(1, length(p))
-    if (length(p) != length(weights))
+.sumzp<-function(pw){
+    size <- pw[length(pw)]
+    p <- pw[1:size]
+    weights_z <- pw[(size+1):(length(pw)-1)]
+    if (length(p) != length(weights_z))
         warning("Length of p and weights differ")
     keep <- (p > 0) & (p < 1) & (is.na(p)==FALSE)
     zp <- (qnorm(p[keep], lower.tail=FALSE) %*%
-            weights[keep])/sqrt(sum(weights[keep]^2))
+            weights_z[keep])/sqrt(sum(weights_z[keep]^2))
     res <- list(z = zp, p = pnorm(zp, lower.tail=FALSE),
-        weights = weights[keep])
+        weights = weights_z[keep])
     return(res)
 }
 
 ## Stouffer's method
-.getStouffer <- function(p, weight = NULL){
+.getStouffer <- function(resultP){
+    p <- resultP$p
+    weights_z <- resultP$weights_z
     print("Performing Stouffer's method")
     stat <- res <- pval <- fdr <- 0
-    todos <- apply(p, 1, .sumzp)
+    size <- rep(ncol(p), nrow(p))
+    pw <- cbind(p, weights_z)
+    pw <- cbind(pw,size)
+    todos <- apply(pw, 1, .sumzp)
     ## Extraction of p-values of each one
     for(i in seq_len(nrow(p))){
         stat[i] <- todos[[i]]$z
