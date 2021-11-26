@@ -24,11 +24,13 @@ See "Details"for more information}
 \item{missAllow}{a number that indicates the maximun proportion of missing
 values allowed in a sample. If the sample has more proportion of missing
 values the sample will be eliminated. In the other case the missing values
-will be imputed using the K-NN algorithm.}
+will be imputed using the K-NN algorithm. In case the objectMA has been 
+previously imputed, this element is not necessary.}
 
 \item{proportionData}{The minimum proportion of datasets in which a gene
 must be contained to be included. By default, the gene must be contained 
-in at least half of the datasets}
+in at least half of the datasets. In case the objectMA has been previously 
+imputed, this element is not necessary.}
 
 }
 \value{

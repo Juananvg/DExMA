@@ -20,7 +20,7 @@ BiocStyle::latex()
 \maketitle
 
 \begin{abstract}
-\noindent \textbf{DExMA} (Differential Expression Meta-Analysis) performs all the  neccessary steps of differential expression meta-analysis, without eliminating those genes that are presented in at least a certain proportion of datasets. In addition, it allows to apply quality controls, download GEO datasets and show a graphical representation of the results.
+\noindent \textbf{DExMA} (Differential Expression Meta-Analysis) performs all the  necessary steps of differential expression meta-analysis considering the possible existence of missing genes. It controls the existence of unmeasured genes by two approaches: considering the genes that are contained in a proportion of datasets (set by the users) or imputing the expression values of the unmeasured genes using the \emph{Knn method} in the space of samples. In addition, it allows to apply quality controls, download GEO datasets and show a graphical representation of the results.
 \end{abstract}
 
 packageVersion{\Sexpr{BiocStyle::pkg_ver("DExMA")}
@@ -29,7 +29,9 @@ packageVersion{\Sexpr{BiocStyle::pkg_ver("DExMA")}
 \newpage
 
 \section{Introduction}
-\textbf{DExMA} is a package designed to perform gene expression meta-analysis. Gene expression meta-analysis comprises a set of methods that  combine the results of several differential expression studies  into a single common result \cite{Toro:2020}. Furthermore, this package has the advantage that it allows to takes into account those genes  that are  contained in at least a certain proportion (set by the user) of datasets, instead of using only those genes that are common to all the studies. The use of only the genes common to all the datasets could lead to the loss of some genes that are not measured in a single study, which would lead to the loss of information. Due to this fact, \textbf{DExMA} package is very useful to work with  Microarray data, because this type of data is what usually produces the existence of uncommon genes between datasets with different annotations. However, previously normalized RNA-Seq data can also be used, as well as, both Microarray data and normalized RNA-Seq data at the same time.
+
+\textbf{DExMA} is a package designed to perform gene expression meta-analysis. Gene expression meta-analysis comprises a set of methods that combine the results of several differential expression studies  into a single common result \cite{Toro:2020}. Furthermore, this package has the advantage that it allows to takes into account those genes that are not measured in a study. The first approach to control these missing genes, \textbf{DExMA} offers two options: apply the k-nearest neighbors method (knn method) in the space of samples to impute the expression values of these missing genes \cite{2020:Mancuso}. The second option is to take into account those genes that are contained in at least a certain proportion (set by the user) of datasets. The use of only the genes common to all the datasets could lead to the loss of some genes that are not measured in a single study, which would lead to the loss of information. Due to this fact, \textbf{DExMA} package is very useful to work with  Microarray data, because this type of data is what usually produces the existence of uncommon genes between datasets with different annotations. However, previously normalized RNA-Seq data can also be used, as well as, both Microarray data and normalized RNA-Seq data at the same time.
+
 
 \textbf{DExMA} package has implemented methods from the three main types of  gene expression meta-analysis \cite{Toro:2020} meta-analysis based on effects sizes combination and meta-analysis based on p-values combination. Once one of the methods has been  applied, \textbf{DExMA} package  provides a specific and adapted results table. Moreover, this package contains some functions that allows the  user to carry out a previous quality control in order to results obtained are more reliable. Finally, this package provides some additional function that,  for example, help the user to download public Microarray data from NCBI GEO  public database \cite{Barret:2013} or to visualize the significant genes  in a heatmap.
 
@@ -59,9 +61,6 @@ data("DExMAExampleData")
     \item maObjectDif: the meta-analysis object created from the listMatrixEX and listPhenodatas objects.
     \item maObject: the meta-analysis object after setting all the studies in Official Gene Symbol annotation
 \end{itemize}
-
-
-
 
 \subsection{Meta-analysis object creation (objectMA)}
 
@@ -313,6 +312,24 @@ In the example shown below, it is observed that in the QQ-plot of the  Cochran's
 heterogeneityTest(newObjectMA)
 @
 
+\subsection{Imputing missing genes expression values (optional)}
+
+Optionally, the \emph{missGenesImput()} function allows to impute the expression values of the unmeasured genes. To perform this imputation, the function apply the knn method in the space of samples (\emph{sampleKnn}) \cite{2020:Mancuso}. Once the function have been applied, it returns the same \emph{objectMA} with all the datasets imputed:
+
+
+<<>>=
+nrow(newObjectMA$Study1[[1]])
+nrow(newObjectMA$Study2[[1]])
+maObject_imput <- missGenesImput(maObject, k =7)
+@
+
+If we observe the number of genes in Study1, once the imputation is performed, we can observe that it goes from having 144 genes to 175.
+
+<<>>=
+nrow(maObject_imput$Study1[[1]])
+nrow(maObject_imput$Study2[[1]])
+@
+
 \subsection{Performing meta-analysis: \emph{metaAnalysisDE()}}
 
 The \emph{metaAnalysisDE()} function allows to perform a meta-analysis in only one step, needing only the meta-analysis object created previously. 
@@ -329,22 +346,29 @@ This function has as input:
         \item "maxP": Wilkinson's method (maximun of p-values)
         \item "minP": Tippet's method (minimun of p-values)
     \end{itemize}
-    \item missAllow: a number between 0 and 1 that indicates the maximum proportion of missing values allows in a sample. If the sample has more proportion of missing values, the sample will be eliminated. In the other case, the missing values will be imputed by using the K-NN algorithm included in \Biocpkg{impute} package \cite{Impute:2019}.
-    \item proportionData: a number between 0 and 1 that indicates the minimum proportion of datasets in which a gene must be contained to be included.
+    \item missAllow: a number between 0 and 1 that indicates the maximum proportion of missing values allows in a sample. If the sample has more proportion of missing values, the sample will be eliminated. In the other case, the missing values will be imputed by using the K-NN algorithm included in \Biocpkg{impute} package \cite{Impute:2019}. In case the \emph{objectMA} has been previously imputed, this element is not necessary.
+    \item proportionData: a number between 0 and 1 that indicates the minimum proportion of datasets in which a gene must be contained to be included.In case the \emph{objectMA} has been previously imputed, this element is not necessary.
     \item Adjusted p-value from which a gene is considered significant. Default 0.05.  This value only takes you into account in the results generated in rank combination methods.
 \end{itemize}
 
-In the following example, we have applied a Random Effect model to the \emph{DExMA} object ("newObjectMA") we have been working with so far. In addition we have allowed a 0.3 proportion of missing values in a sample and a gene must have been contained in at least the 75\% of studies.
+In the following example, we have applied a Random Effect model to the \emph{DExMA} object ("newObjectMA") we have been working with so far. In addition we have allowed a 0.3 proportion of missing values in a sample and a gene must have been contained in at least the 50\% of studies.
 
 <<>>=
 resultsMA <- metaAnalysisDE(newObjectMA, typeMethod="REM",
-                            missAllow=0.3, proportionData=0.75)
+                            missAllow=0.3, proportionData=0.50)
 @
 
 The output of this function is a dataframe with the results of the meta-analysis where rows are the genes and columns are the different variables provided by the meta-analysis:
 
 <<>>=
 head(resultsMA)
+@
+
+Moreover, this function can also be applied to the imputed \emph{objectMA}, but in this case, it is not necessary to indicate the \emph{missAllow} and \emph{proportionData} elements:
+
+<<>>=
+resultsMA_imput <- metaAnalysisDE(maObject_imput, typeMethod="REM",)
+head(resultsMA_imput)
 @
 
 The variables of the dataframe change from one type of meta-analysis to another. A more detailed explanation of these results will be addressed in the following sections.
@@ -387,7 +411,6 @@ resultsPV <- metaAnalysisDE(newObjectMA, typeMethod="maxP", proportionData=0.5)
 head(resultsPV)
 @
 
-
 \subsection{Visualization of the results: heatmap}
 
 Finally, we can represent in a heatmap the significant genes in order to observe how they are expressed in each of the studies. In \emph{makeHeatma()} function we have to include both the object that has been used in the meta-analysis, the result of it and the applied method. In addition, this package offers three different scaling approaches (\textit{scaling}) in order to compare properly thegene expression of the studies in the heatmap:
@@ -418,11 +441,9 @@ makeHeatmap(objectMA=newObjectMA, resMA=resultsMA, scaling = "zscor",
 \section{Additional information}
 \textbf{DExMA} provides some functions which may be useful for the user, although they are not essential to perform meta-analysis.
 
-
-
 \subsection{GEO microarray data download}
 
-In addition to using own user data, DExMA package allows to make use of 
+In addition to using own user data, \textbf{DExMA} package allows to make use of 
 public microarray data from the NCBI GEO public database \cite{Barret:2013}. 
 For doing that, we can make use of \emph{downloadGEOData()} function. This function uses internally \Biocpkg{GEOquey} package in order to download some files at the same time. This function has an input a character vector 
 (\emph{GEOobject}) with the GEO ID of the different datasets that we want to download and a character (\emph{directory}) that indicates the directory 
