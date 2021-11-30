@@ -2,6 +2,13 @@
 \title{DExMA News}
 \encoding{UTF-8}
 
+\section{version 1.2.1}{
+    \itemize{
+    \item missGenesImput function added
+    \item SampleKnn imputation method for unmeasured genes added
+    }
+}
+
 \section{version 1.1.2}{
     \itemize{
     \item Weights added to the Stouffer's method

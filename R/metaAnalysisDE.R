@@ -6,11 +6,11 @@
 #' @param objectMA A list of list. Each list contains two elements. The first
 #' element is the expression matrix (genes in rows and sample in columns) and
 #' the second element is a vector of zeros and ones that represents the state
-#' of the diffenrent samples of the expression matrix. 0 represents one group
+#' of the different samples of the expression matrix. 0 represents one group
 #' (controls) and 1 represents the other group (cases).
 #' The result of the CreateobjectMA can be used too.
 #'
-#' @param typeMethod A character that indicates the method to be peformed.
+#' @param typeMethod A character that indicates the method to be performed.
 #' See "Details"for more information
 #'
 #' @param missAllow a number that indicates the maximum proportion of missing
@@ -266,7 +266,7 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
 ## Function to obtain the statistic
 .sumzp<-function(pw){
     size <- pw[length(pw)]
-    p <- pw[1:size]
+    p <- pw[seq_len(size)]
     weights_z <- pw[(size+1):(length(pw)-1)]
     if (length(p) != length(weights_z))
         warning("Length of p and weights differ")
