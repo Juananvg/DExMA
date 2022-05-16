@@ -14,17 +14,16 @@
 #' @param nameGroup Name of the column of the Phenodata object in which the 
 #' reference groups (cases and controls) are
 #'
+#' @param ... Other arguments are passed to lmFit of limma package
+#'
 #' @return The Expression Matrix with the bias or batch effect corrected.
 #' Moreover a plot of the visualization of the association between principal 
 #' components and covariates is shown.
 #'
-#' @note For more information of the returned visualization see the 
-#' seeCOV function
 #'
 #' @author Juan Antonio Villatoro Garcia,
 #' \email{juanantoniovillatorogarcia@@gmail.com}
 #'
-#' @seealso \code{\link{seeCov}}
 #'
 #' @references Martin Lauss (2019). swamp: Visualization, Analysis and 
 #' Adjustment of High-Dimensional Data in Respect to Sample Annotations. 
@@ -40,7 +39,7 @@
 
 
 batchRemove <- function(expressionMatrix, pheno, formula, mainCov=NULL,
-    nameGroup){
+    nameGroup, ...){
     # Remove invariable
     pheno<-pheno[,apply(pheno,2,function(x) length(table(x)))>1]
     Diagnosis <- pheno[,nameGroup]
@@ -50,11 +49,11 @@ batchRemove <- function(expressionMatrix, pheno, formula, mainCov=NULL,
     if(is.null(mainCov)){
         ebatch <- removeBatchEffect(expressionMatrix,
             covariates=design.covariates,
-            design = design.disease)
+            design = design.disease, ... = ...)
     }else{
         ebatch <- removeBatchEffect(expressionMatrix, batch=pheno[,mainCov],
             covariates=design.covariates,
-            design=design.disease)
+            design=design.disease, ... = ...)
     }
     # Character variables must be converted in numeric
     pheno.factors <- pheno

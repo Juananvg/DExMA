@@ -23,7 +23,7 @@ A list formed by two elements:
 \item First element (p) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe represents
 the p-value.
-\item Second element (FC) is a dataframe were columns are each of the studies
+\item Second element (logFC) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe is the logFC.
 \item Third element (weights_z) is a dataframe were columns are each of the 
 studies (datasets) and rows are the genes.  Each element of the dataframe 

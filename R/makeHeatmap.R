@@ -36,6 +36,12 @@
 #' 
 #' @param numSig The number of most significant genes to be represented
 #' 
+#' @param color vector of colors used in heatmap
+#' 
+#' @param na_col color of the NA cell in the heatmap
+#' 
+#' @param legend logical to determine if legend should be drawn or not
+#' 
 #' 
 #' @details Scaling approaches that can be used are:
 #' \itemize{
@@ -49,7 +55,7 @@
 #' }
 #' 
 #'
-#' @return 'NULL'
+#' @return The matrix represented in the heatmap
 #'
 #'
 #' @author Juan Antonio Villatoro Garcia,
@@ -90,7 +96,10 @@ makeHeatmap <- function(objectMA, resMA,
     regulation=c("all", "up","down"),
     breaks=c(-2,2),
     fdrSig = 0.05,
-    numSig = 50){
+    numSig = 50,
+    color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
+    na_col = "darkgrey",
+    legend = TRUE){
     typeMethod <- match.arg(typeMethod)
     scaling<-match.arg(scaling)
     regulation<-match.arg(regulation)
@@ -128,13 +137,13 @@ makeHeatmap <- function(objectMA, resMA,
     ## Scaling datasets
     switch(scaling,
         rscale={exp.ALL<- .rscale(objectMA, sig.genes, exp.ALL)
-                bks=NULL},
+        bks=NULL},
         zscor={exp.ALL<- .zscor(objectMA, sig.genes, exp.ALL)},
         none={heatmap.var="row"
-                exp.ALL<- .none(objectMA, sig.genes, exp.ALL)},
+        exp.ALL<- .none(objectMA, sig.genes, exp.ALL)},
         swr={heatmap.var="row"
-            exp.ALL<- .swr(objectMA, resMA, sig.genes, exp.ALL)}
-        )
+        exp.ALL<- .swr(objectMA, resMA, sig.genes, exp.ALL)}
+    )
     ## Heatmap
     ann <- data.frame(state=ifelse(all.cl == 0, "Healthy","Case"),
         dataset=sizes, row.names=colnames(exp.ALL))
@@ -142,8 +151,9 @@ makeHeatmap <- function(objectMA, resMA,
     else{show.rownames=TRUE}
     pheatmap(exp.ALL[,order(all.cl, decreasing=TRUE)],annotation_col=ann,
         cluster_cols=FALSE, cluster_rows=FALSE, scale=heatmap.var, breaks=bks,
-        show_colnames=FALSE,show_rownames=show.rownames, na_col="darkgrey")
-    
+        show_colnames=FALSE,show_rownames=show.rownames, na_col = na_col, 
+        color = color, legend = legend)
+    return(exp.ALL)
 }
 
 

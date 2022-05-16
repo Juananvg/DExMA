@@ -1,8 +1,8 @@
 \name{heterogeneityTest}
 \alias{heterogeneityTest}
-\title{It allows checking the heterogeneity of the different studies}
+\title{Checking the heterogeneity of the different studies}
 \usage{
-heterogeneityTest(objectMA)
+heterogeneityTest(objectMA, probs = c(0, 0.25, 0.5, 0.75))
 }
 \arguments{
 \item{objectMA}{A list of list. Each list contains two elements. The first
@@ -11,9 +11,11 @@ the second element is a vector of zeros and ones that represents the state
 of the different samples of the expression matrix. 0 represents one group
 (controls) and 1 represents the other group (cases).
 The result of the CreateobjectMA can be used too.}
+\item{probs}{Numeric vector of probabilities with values between 0 and 1. It
+indicates the I^2 quantiles that will be returned}
 }
 \value{
-Deciles of the I^2 values
+Quantiles of the I^2 values
 }
 \description{
 Shows a QQ-plot of the Cochran's test and the quantiles of I^2 statistic values

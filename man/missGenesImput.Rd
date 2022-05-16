@@ -15,7 +15,17 @@ The result of the CreateobjectMA can be used too.}
 \item{k}{Number of neighbors to be used in the imputation (default=7).}
 }
 \value{
-The same objectMA with missing genes imputed
+A list formed by two elements:
+\itemize{
+\item First element (objectMA) the same objectMA with missign genes imputed
+\item Second element (imputIndicators) a list with 4 different objects:
+    \itemize{
+    \item imputValuesSample: Number of missing values imputed per sample
+    \item imputPercentageSample: Percentage of missing values imputed per sample
+    \item imputValuesGene: Number of missing values imputed per gene
+    \item imputPercentageGene: Percentage of missing values imputed per gene
+    }
+}
 }
 \description{
 missGenesImput uses k-nearest neighbors in the space of samples

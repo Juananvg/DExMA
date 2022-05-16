@@ -2,7 +2,7 @@
 \alias{allSameID}
 \title{Set all datasets in the same ID}
 \usage{
-allSameID(objectMA, initialIDs, finalID = "GeneSymbol",
+allSameID(objectMA, finalID = "GeneSymbol",
     organism="Homo sapiens")
 }
 \arguments{
@@ -12,10 +12,6 @@ the second element is a vector of zeros and ones that represents the state
 of the different samples of the expression matrix. 0 represents one group
 (controls) and 1 represents the other group (cases).
 The result of the CreateobjectMA can be used too.}
-
-\item{initialIDs}{A vector in which each element indicates the ID of the 
-equivalent element of listExpMatrix. To know the avalible ids, you can write
-avaliableIDs}
 
 \item{finalID}{A character that indicates the final ID all the different
 studies will have. To know the available ids, you can write avaliableIDs.}
@@ -32,8 +28,7 @@ same ID (Official Gene Symbol, Entrez or Ensembl)
 }
 \examples{
 data(DExMAExampleData)
-sameData <- allSameID(objectMA = maObjectDif, initialIDs = c("Entrez",
-"Entrez", "GeneSymbol", "GeneSymbol"), finalID = "GeneSymbol", 
+sameData <- allSameID(objectMA = maObjectDif, finalID = "GeneSymbol", 
 organism = "Homo sapiens")
 sameData
 }

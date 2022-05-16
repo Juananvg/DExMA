@@ -21,7 +21,7 @@
 #' \item{First element (p) is a dataframe were columns are each of the studies
 #' (datasets) and rows are the genes. Each element of the dataframe represents
 #' the p-value.}
-#' \item{Second element (FC) is a dataframe were columns are each of the studies
+#' \item{Second element (logFC) is a dataframe were columns are each of the studies
 #' (datasets) and rows are the genes. Each element of the dataframe the logFC.}
 #' \item{Third element (weights_z) is a dataframe were columns are each of the 
 #' studies (datasets) and rows are the genes.  Each element of the dataframe 
@@ -90,7 +90,7 @@ pvalueIndAnalysis <- function(objectMA, missAllow=0.3){
     fc <- .matrixmerge(storeF)
     p <- .matrixmerge(storeP)
     weights_z <- .calW(objectMA)
-    resultP <- list(p = p, FC = fc, weights_z = weights_z)
+    resultP <- list(p = p, logFC = fc, weights_z = weights_z)
     return(resultP)
 }
 

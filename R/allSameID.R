@@ -7,9 +7,6 @@
 #' of the different samples of the expression matrix. 0 represents one group
 #' (controls) and 1 represents the other group (cases).
 #' The result of the CreateobjectMA can be used too.
-#' @param initialIDs A vector in which each element indicates the ID of the 
-#' equivalent element of listExpMatrix.
-#' To know the avalible ids, you can write avaliableIDs.
 #' @param finalID A character that indicates the final ID all the different
 #' studies will have. To know the available ids, you can write avaliableIDs.
 #' @param organism A character that indicates the organism of the data.
@@ -24,30 +21,23 @@
 #'
 #' @examples
 #' data(DExMAExampleData)
-#' sameData <- allSameID(objectMA = maObjectDif, initialIDs = c("Entrez",
-#' "Entrez", "GeneSymbol", "GeneSymbol"), finalID = "GeneSymbol", 
+#' sameData <- allSameID(objectMA = maObjectDif, 
+#' finalID = "GeneSymbol", 
 #' organism = "Homo sapiens")
 #' sameData
 #'
 #' @export
 
-allSameID<- function(objectMA, initialIDs, finalID = "GeneSymbol",
+allSameID<- function(objectMA, finalID = "GeneSymbol",
     organism="Homo sapiens"){
     listExpMatrix <- lapply(objectMA, function(l) l[[1]])
-    if(length(listExpMatrix) != length(initialIDs)){
-        stop("objectMA and initialIDs must have the same length")}
     if(!is.list(objectMA)) {stop("objectMA must be a list")}
     if(length(organism) != 1) {stop("Only one organism can be included")}
-    if(!is.character(initialIDs))
-    {stop("initialIDs must an object of class character")}
     if(!is.character(finalID))
     {stop("finalID must an object of class character")}
     if(!(finalID %in% DExMAdata::avaliableIDs)){
         stop("finalID not available")}
-    for (j in seq_len(length(initialIDs))){
-        if(!(initialIDs[j] %in% DExMAdata::avaliableIDs)){
-                stop(initialIDs[j], " not available")}
-    }
+    initialIDs <- .identifyIDS(objectMA)
     k<-length(listExpMatrix)
     newlist <- list(0)
     message("Changing IDs")
@@ -66,6 +56,30 @@ allSameID<- function(objectMA, initialIDs, finalID = "GeneSymbol",
     }
     return(objectMA)
 }
+
+#Fucntion to identify genes IDs
+.identifyIDS <- function(objectMA){
+    annot <- DExMAdata::IDsDExMA
+    genesName <- lapply(objectMA, function(x){return(rownames(x[[1]]))})
+    ids <- NA
+    for(i in seq_len(length(objectMA))){
+        cont <- c(FALSE, FALSE, FALSE)
+        res <- genesName[[i]] %in% annot$GeneSymbol
+        if (TRUE %in% res){cont[1] <- TRUE}
+        res <- genesName[[i]] %in% annot$Entrez
+        if (TRUE %in% res){cont[2] <- TRUE}
+        res <- genesName[[i]] %in% annot$Ensembl
+        if (TRUE %in% res){cont[3] <- TRUE}
+        if(sum(cont)<1){stop(
+            "One of the datsets has genes IDs that are not avalible")}
+        if(sum(cont)>1){stop("One of the datasets has more than a gene ID")}
+        if(cont[1]){ids[i] <- "GeneSymbol"}
+        if(cont[2]){ids[i] <- "Entrez"}
+        if(cont[3]){ids[i] <- "Ensembl"}
+    }
+    return(ids)
+}
+
 
 
 #Function to review GeneSymbol
