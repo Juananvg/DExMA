@@ -3,9 +3,12 @@
 \title{Performing Meta-analysis}
 \usage{
 metaAnalysisDE(
-    objectMA,
+    objectMA = NULL,
+    effectS = NULL,
+    pvalues = NULL,
+    weight = NULL,
     typeMethod = c("FEM", "REM", "maxP", "minP", "Fisher", 
-                    "Stouffer"),
+                    "Stouffer", "ACAT"),
     missAllow = 0.3,
     proportionData = 0.5
 )
@@ -18,10 +21,30 @@ of the diffenrent samples of the expression matrix. 0 represents one group
 (controls) and 1 represents the other group (cases).
 The result of the CreateobjectMA can be used too.}
 
+\item{effectS}{A list of two elements. The first element is a dataframe
+with genes in rows and studies in columns. Each component of the dataframe
+is the effect of a gene in a study. 
+The second element of the list is also a dataframe
+with the same structure, but in this case each component of the dataframe
+represent the variance of the effect of a gene in a study. This argument
+should be only used in the case that objectMA argument is null.}
+
+\item{pvalues}{A list of two elements. The first element is a dataframe
+with genes in rows and studies in columns. Each component of the dataframe
+is the p-value of a gene in a study. 
+The second element of the list is also a dataframe
+with the same structure, but in this case each component of the dataframe
+represent the log fold change of a gene in a study. This argument
+should be only used in the case that objectMA argument is null.}
+
+\item{weight}{A vector of the weights of each dataset. This argument should 
+only be included in case objectMA is null and you want to use "Stouffer" or 
+"ACAT" method.}
+
 \item{typeMethod}{A character that indicates the method to be peformed.
 See "Details"for more information}
 
-\item{missAllow}{a number that indicates the maximun proportion of missing
+\item{missAllow}{A number that indicates the maximun proportion of missing
 values allowed in a sample. If the sample has more proportion of missing
 values the sample will be eliminated. In the other case the missing values
 will be imputed using the K-NN algorithm. In case the objectMA has been 
@@ -39,10 +62,10 @@ applied method, a different dataframe is obtained. For more information
 see the package vignette.
 }
 \description{
-It performs meta-analysis using eight different methods.
+It performs meta-analysis using seven different methods.
 }
 \details{
-The different meta-analysis method that can be applied are:
+The different meta-analysis methods that can be applied are:
 \enumerate{
 \item \bold{Effects sizes methods:}
     \itemize{
@@ -54,7 +77,8 @@ The different meta-analysis method that can be applied are:
         \item "Fisher": Fisher's methods
         \item "Stouffer": Stouffer's method
         \item "maxP": maximum p-value method (Wilkinson's method)
-        \item "minP": minimum p-value method (Tippet's method)
+        \item "minP": minimum p-value method (Tippett's method)
+        \item "ACAT": Aggregated Cauchy Association Test method
         }
 }
 }
@@ -73,7 +97,13 @@ Briefings in Bioinformatics, 2020;, bbaa019,
 \url{https://doi.org/10.1093/bib/bbaa019}
 
 Michael Dewey (2020). metap: meta-analysis of significance values.
+
+Liu, Y., Chen, S., Li, Z., Morrison, A. C., Boerwinkle, E., & Lin, X. (2019). 
+ACAT: A Fast and Powerful p Value Combination Method for Rare-Variant Analysis 
+in Sequencing Studies. The American Journal of Human Genetics, 104(3), 410-421.
+\url{https://doi.org/10.1016/j.ajhg.2019.01.002}
 }
+
 \author{
 Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

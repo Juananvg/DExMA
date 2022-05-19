@@ -9,6 +9,26 @@
 #' of the different samples of the expression matrix. 0 represents one group
 #' (controls) and 1 represents the other group (cases).
 #' The result of the CreateobjectMA can be used too.
+#' 
+#' @param effectS A list of two elements. The first element is a dataframe
+#' with genes in rows and studies in columns. Each component of the dataframe
+#' is the effect of a gene in a study. 
+#' The second element of the list is also a dataframe
+#' with the same structure, but in this case each component of the dataframe
+#' represent the variance of the effect of a gene in a study. This argument
+#' should be only used in the case that objectMA argument is null.
+#' 
+#' @param pvalues A list of two elements. The first element is a dataframe
+#' with genes in rows and studies in columns. Each component of the dataframe
+#' is the p-value of a gene in a study. 
+#' The second element of the list is also a dataframe
+#' with the same structure, but in this case each component of the dataframe
+#' represent the log fold change of a gene in a study. This argument
+#' should be only used in the case that objectMA argument is null.
+#' 
+#' @weight A vector of the weights of each dataset. This argument should only 
+#' be included in case objectMA is null and you want to 
+#' use Stouffer or ACAT method.
 #'
 #' @param typeMethod A character that indicates the method to be performed.
 #' See "Details"for more information
@@ -24,7 +44,7 @@
 #' in at least half of the datasets
 #'
 #' 
-#' @details The different meta-analysis method that can be applied are:
+#' @details The different meta-analysis methods that can be applied are:
 #'\enumerate{
 #'    \item \bold{Effects sizes methods:}
 #'    \itemize{
@@ -36,7 +56,8 @@
 #'         \item "Fisher": Fisher's methods
 #'         \item "Stouffer": Stouffer's method
 #'         \item "maxP": maximum p-value method (Wilkinson's method)
-#'         \item "minP": minimum p-value method (Tippet's method)
+#'         \item "minP": minimum p-value method (Tippett's method)
+#'         \item "ACAT": Aggregated Cauchy Association Test method
 #'     }
 #' }
 #' 
@@ -57,6 +78,10 @@
 #' Michael Dewey (2020). metap: meta-analysis of significance values. 
 #' R package version 1.4
 #' 
+#' Liu, Y., Chen, S., Li, Z., Morrison, A. C., Boerwinkle, E., & Lin, X. (2019).
+#'  ACAT: A Fast and Powerful p Value Combination Method for Rare-Variant 
+#'  Analysis in Sequencing Studies. The American Journal of Human Genetics, 
+#'  104(3), 410-421. https://doi.org/10.1016/j.ajhg.2019.01.002
 #'
 #' @author Juan Antonio Villatoro Garcia, 
 #' \email{juanantoniovillatorogarcia@@gmail.com}
@@ -73,18 +98,41 @@
 #' @export
 
 
-metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
-    "minP","Fisher","Stouffer"),
+metaAnalysisDE<-function(objectMA = NULL, effectS = NULL, 
+    pvalues = NULL, weight = NULL,
+    typeMethod=c("FEM", "REM", "maxP","minP","Fisher","Stouffer", "ACAT"),
     missAllow=0.3, proportionData = 0.5){
     typeMethod <- match.arg(typeMethod)
     if(typeMethod == "FEM" | typeMethod == "REM"){
-        effects <- calculateES(objectMA, missAllow = missAllow)
-        results <- .metaES(effects, metaMethod = typeMethod,
+        if(!is.null(objectMA)){
+            effectS <- calculateES(objectMA, missAllow = missAllow)}
+        else{
+            if(is.null(effectS)){
+                stop("You have to add an effectS argument is objectMA is null")}
+            names(effectS) <- c("ES", "Var")    
+        }
+        results <- .metaES(effectS, metaMethod = typeMethod,
             proportionData = proportionData)
     }
-    if(typeMethod == "Fisher" | typeMethod == "Stouffer" |
-            typeMethod == "maxP" | typeMethod == "minP"){
-        pvalues <- pvalueIndAnalysis(objectMA, missAllow = missAllow)
+    if(typeMethod == "Fisher" | typeMethod == "Stouffer" | 
+            typeMethod == "maxP" | typeMethod == "minP" | typeMethod == "ACAT"){
+        if(!is.null(objectMA)){
+            pvalues <- pvalueIndAnalysis(objectMA, missAllow = missAllow)}
+        else{
+            if(is.null(pvalues)){
+                stop("You have to add a pvalues argument is objectMA is null")}
+            names(pvalues) <- c("p", "logFC")
+            if(typeMethod == "Stouffer" | typeMethod == "ACAT"){
+                if(is.null(weight)){
+                    stop("weight argument is required for this method")
+                }
+                pvalues[[3]] <- weight
+                for(i in seq_len(nrow(pvalues[[1]]))[-1]){
+                    pvalues[[3]] <- rbind(pvalues[[3]], weight)
+                }
+                names(pvalues) <- c("p", "logFC", "weights_z")
+            }
+        }
         results <- .metaPvalue(pvalues, metaMethod = typeMethod,
             proportionData = proportionData)
     }
@@ -196,7 +244,7 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
 
 ## P-VALUES COMBINATION FUNCTIONS
 .metaPvalue <-function(resultP, metaMethod=c("maxP", "minP", "Fisher",
-    "Stouffer"), proportionData = 0.5){
+    "Stouffer", "ACAT"), proportionData = 0.5){
     p <- resultP$p
     K <- ncol(p)
     nm <- length(metaMethod)
@@ -206,7 +254,8 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
         temp <- switch(metaMethod[i], maxP = {.getMaxP(p)},
             minP = {.getMinP(p)},
             Fisher = {.getFisher(p)},
-            Stouffer = {.getStouffer(resultP)})
+            Stouffer = {.getStouffer(resultP)},
+            ACAT = {.getACAT(resultP)})
         meta.res$stat[,i] <- temp$stat
         meta.res$pval[,i] <- temp$pval
         meta.res$FDR[,i] <- temp$FDR
@@ -219,9 +268,9 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
         rownames(meta.res$FDR) <- rownames(p)
     attr(meta.res, "nstudy") <- K
     attr(meta.res, "metaMethod") <- metaMethod
-    ind.res <- as.data.frame(matrix(rowMeans(resultP$FC, na.rm=TRUE), ncol=1))
+    ind.res <- as.data.frame(matrix(rowMeans(resultP$logFC, na.rm=TRUE), ncol=1))
     colnames(ind.res) <- "logFC"
-    rownames(ind.res) <- rownames(resultP$FC)
+    rownames(ind.res) <- rownames(resultP$logFC)
     res <- data.frame(matrix(0, ncol=5, nrow= nrow(p)))
     colnames(res) <- c("Stat", "Pval", "FDR", "AveFC", "propDataset")
     rownames(res) <-rownames(p)
@@ -355,6 +404,43 @@ metaAnalysisDE<-function(objectMA, typeMethod=c("FEM", "REM", "maxP",
     }
     fdr <- p.adjust(pval, method = "BH")
     res <- list(stat = stat, pval = pval, FDR = fdr)
+    names(res$stat) <- names(res$pval) <- names(res$FDR) <- rownames(p)
+    return(res)
+}
+
+## ACAT (Aggregated Cauchy Association Test) method
+# Functions to obtain the statistic
+.sumCauchy <- function(pw){
+    size <- pw[length(pw)]
+    p <- pw[seq_len(size)]
+    weights_z <- pw[(size+1):(length(pw)-1)]
+    if (length(p) != length(weights_z)){
+        warning("Length of p and weights differ")}
+    keep <- (p > 0) & (p < 1) & (is.na(p)==FALSE)
+    weights_c <- weights_z[keep] / sum(weights_z[keep])
+    tangent <- tan((0.5 - p[keep])*pi)
+    tan_wi <- sum(weights_c * tangent)
+    res <- list(q = tan_wi, p = pcauchy(tan_wi, lower.tail = FALSE), 
+        weights_c = weights_c)
+    return(res)
+}
+
+.getACAT <- function(resultP){
+    p <- resultP$p
+    weights_z <- resultP$weights_z
+    print("Performing ACAT's method")
+    stat <- res <- pval <- fdr <- 0
+    size <- rep(ncol(p), nrow(p))
+    pw <- cbind(p, weights_z)
+    pw <- cbind(pw,size)
+    todos <- apply(pw, 1, .sumCauchy)
+    ## Extraction of p-values of each one
+    for(i in seq_len(nrow(p))){
+        stat[i] <- todos[[i]]$q
+        pval[i] <- todos[[i]]$p
+    }
+    fdr <- p.adjust(pval, method = "BH")
+    res<-list(stat = stat, pval = pval, FDR = fdr)
     names(res$stat) <- names(res$pval) <- names(res$FDR) <- rownames(p)
     return(res)
 }

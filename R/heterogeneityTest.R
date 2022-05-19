@@ -10,6 +10,9 @@
 #' of the different samples of the expression matrix. 0 represents one group
 #' (controls) and 1 represents the other group (cases).
 #' The result of the CreateobjectMA can be used too.
+#' 
+#' @param probs Numeric vector of probabilities with values between 0 and 1. It
+#' indicates the I^2 quantiles that will be returned
 #'
 #' @details If in the QQ-plot of the Cochran’s test most of the values are 
 #' close to the central line (most of the Cochran’s test values
@@ -21,7 +24,7 @@
 #' heterogeneity. To assume homogeneity in the gene expression meta-analysis, 
 #' almost all I^2 values (quantiles) must be 0 or at least less than 0.25. 
 #'
-#' @return Deciles of the I^2 values and a QQ-plot of the Cochran's test
+#' @return Quantiles of the I^2 values and a QQ-plot of the Cochran's test
 #'
 #' @author Juan Antonio Villatoro Garcia,
 #' \email{juanantoniovillatorogarcia@@gmail.com}
@@ -43,7 +46,7 @@
 #' @export
 
 #Heterogeneity test
-heterogeneityTest<-function(objectMA){
+heterogeneityTest<-function(objectMA, probs = c(0,0.25,0.5,0.75)){
     allES <- calculateES(objectMA)
     wt <- 1/allES$Var
     temp1 <- wt * allES$ES
@@ -54,12 +57,12 @@ heterogeneityTest<-function(objectMA){
     colnames(I2) <- c("Estatistic", "other")
     I2 <- as.data.frame(apply(I2, 1, max))
     colnames(I2) <- "I2"
-    quantileI2 <- quantile(I2$I2, probs=seq(from=0, to=1, by=0.05))
+    quantileI2 <- quantile(I2$I2, probs=probs)
     I2 <- as.vector(I2$I2)
     print("I^2 Quantiles")
     colnames(Qs) <- "Qs"
     Qs <- Qs$Qs
     qq.chisq(Qs, df=length(objectMA)-1, slope.one=TRUE,
-        main = "QQ plot heterogeneity", col.shade="white")
+        main = "QQ-plot heterogeneity", col.shade="white")
     return(quantileI2)
 }

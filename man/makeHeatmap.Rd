@@ -10,7 +10,9 @@ makeHeatmap(
     regulation = c("all", "up", "down"),
     breaks = c(-2, 2),
     fdrSig = 0.05,
-    numSig = 50
+    numSig = 50, 
+    color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
+    na_col = "darkgrey", legend =TRUE
 )
 }
 \arguments{
@@ -44,9 +46,16 @@ vector of -2 and 2 as extreme values.}
 Default 0.05}
 
 \item{numSig}{The number of most significant genes to be represented}
+
+\item{color}{Vector of colors used in heatmap}
+
+\item{na_col}{Color of the NA cell in the heatmap}
+
+\item{legend}{Logical to determine if legend should be drawn or not}
+
 }
 \value{
-'NULL'
+The matrix represented in the heatmap
 }
 \description{
 It allows to see how the different significant genes are expressed in the 

@@ -2,7 +2,7 @@
 \alias{batchRemove}
 \title{Elimination of covariates batch effect or bias}
 \usage{
-batchRemove(expressionMatrix, pheno, formula, mainCov = NULL, nameGroup)
+batchRemove(expressionMatrix, pheno, formula, mainCov = NULL, nameGroup, ...)
 }
 \arguments{
 \item{expressionMatrix}{A matrix or data frame with genes in rows and samples
@@ -16,6 +16,9 @@ in columns. An ExpressionSet object can be used too}
 
 \item{nameGroup}{Name of the column of the Phenodata object in which the 
 reference groups (cases and controls) are}
+
+\item{...}{other arguments are passed to lmFit fucntion of limma package}
+
 }
 \value{
 The Expression Matrix with the bias or batch effect corrected.
@@ -25,10 +28,7 @@ components and covariates is shown.
 \description{
 It eliminates the effects of batch or bias of the covariates
 }
-\note{
-For more information of the returned visualization see the 
-seeCOV function
-}
+
 \examples{
 data(DExMAExampleData)
 batchRemove(listMatrixEX$Study2, listPhenodatas$Study2, formula=~gender+race,
@@ -40,9 +40,7 @@ Martin Lauss (2019). swamp: Visualization, Analysis and
 Adjustment of High-Dimensional Data in Respect to Sample Annotations. 
 R package version 1.5.1. \url{https://CRAN.R-project.org/package=swamp}
 }
-\seealso{
-\code{\link{seeCov}}
-}
+
 \author{
 Juan Antonio Villatoro Garcia, \email{juanantoniovillatorogarcia@gmail.com}
 }

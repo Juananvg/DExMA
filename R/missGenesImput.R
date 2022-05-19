@@ -14,7 +14,20 @@
 #' missGenesImput uses k-nearest neighbors in the space of samples
 #' to impute the unmeasured genes of the different datasets. 
 #' 
-#' @return The same object with missing genes imputed
+#' @return A list formed by two elements:
+#' \itemize{
+#' \item{First element (objectMA) the same objectMA with missign genes imputed}
+#' \item {Second element (imputIndicators) a list with 4 different objects:}
+#'     \itemize{
+#'         \item{imputValuesSample: Number of missing values imputed 
+#'         per sample}
+#'         \item{imputPercentageSample: Percentage of missing values 
+#'         imputed per gene}
+#'         \item{imputValuesGene: Number of missing values imputed per sample}
+#'         \item{imputPercentageGene: Percentage of missing values imputed 
+#'         per gene}
+#'     }
+#'}
 #'
 #' @author Juan Antonio Villatoro Garcia,
 #' \email{juanantoniovillatorogarcia@@gmail.com}
@@ -43,7 +56,9 @@
 
 
 missGenesImput <- function(objectMA, k = 7){
+    preObjectMA <- objectMA
     fusionMatrix <- .matrixmergeExpression(objectMA)
+    preFus <- fusionMatrix
     #Scale for imputation
     fusionMatrix.mean <- apply(fusionMatrix, 2, calc.mean)
     fusionMatrix.sd <- apply(fusionMatrix, 2, calc.sd)
@@ -53,13 +68,43 @@ missGenesImput <- function(objectMA, k = 7){
     fsM.scale <- t(fsM.scale)
     #Get the objectMA back
     fusionMatrix <- .unscaleS(fsM.scale, fusionMatrix.mean, fusionMatrix.sd)
+    posFus <- fusionMatrix
     fusionMatrix <- cbind(fusionMatrix, rep(NA, nrow(fusionMatrix)))
     for(est in seq(length(objectMA))){
         objectMA[[est]][[1]] <- fusionMatrix[,seq(1,ncol(objectMA[[est]][[1]]))]
         fusionMatrix <- fusionMatrix[,-seq(1,ncol(objectMA[[est]][[1]]))]
     }
-    return(objectMA)
+    #Checking imputed genes
+    #Number of values imputed
+    print(paste0("Number of values imputed ", sum(is.na(preFus)), " (",
+        round(sum(is.na(preFus)) / ((dim(posFus)[1] * dim(posFus)[2])) ,3), 
+        " %)"))
+    #Number of imputed genes in each datasets
+    percenta <- 0
+    for(i in seq_len(length(objectMA))){
+        percen <- (nrow(objectMA[[i]][[1]]) - nrow(preObjectMA[[i]][[1]])) / 
+            nrow(objectMA[[i]][[1]]) * 100
+        percenta[i] <- percen
+        numGen <- nrow(objectMA[[i]][[1]]) - nrow(preObjectMA[[i]][[1]])
+        print(paste0("Number of genes imputed in ", names(preObjectMA)[i], ": ", 
+            numGen, " of ", nrow(objectMA[[i]][[1]]),  
+            " (", round(percen,1), "%)"))}
+    #Number and percentage values imputed per sample:
+    imputSample <- apply(preFus, 2, function(x){sum(is.na(x))})
+    imputPerSample <- apply(preFus, 2, function(x){
+        sum(is.na(x)) / length(x) * 100})
+    #Number and percentage values imputed per gen:
+    imputGene <- apply(preFus, 1, function(x){sum(is.na(x))})
+    imputPerGene <- apply(preFus, 1, function(x){
+        sum(is.na(x)) / length(x) * 100})
+    #Final object
+    imputIndicators <- list(imputValuesSample = imputSample,
+        imputPercentageSample = imputPerSample, imputValuesGene = imputGene, 
+        imputPercentageGene = imputPerGene)
+    ImputResults <- list(objectMA = objectMA, imputIndicators = imputIndicators)
+    return(ImputResults)
 }
+
 
 
 #Function to calculate the mean per sample

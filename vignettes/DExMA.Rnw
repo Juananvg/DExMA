@@ -13,7 +13,7 @@ BiocStyle::latex()
 \author[1,2]{Juan Antonio Villatoro-García}
 \author[1,2]{Pedro Carmona-Sáez\thanks{\email{pedro.carmona@genyo.es}}}
 \affil[1]{Department of Statistics and Operational Research. University of Granada}
-\affil[2]{Bioinformatics Unit. GENYO, Centre for Genomics and Oncological Research, }
+\affil[2]{Bioinformatics Unit. GENYO, Centre for Genomics and Oncological Research}
 
 \begin{document}
 \SweaveOpts{concordance=FALSE}
@@ -221,7 +221,7 @@ Moreover, an advantage of this function is that it can be used to create one by 
 methods:
 \begin{itemize}
     \item Meta-analysis based on effect size combination: Fixed Effects Model (FEM) and Random Effects Model (REM). 
-    \item Meta-analysis based on P-value combination: Fisher's method, Stouffer's method, Wilkonson's method (maxP) and Tippet's method (minP).
+    \item Meta-analysis based on P-value combination: Fisher's method, Stouffer's method, Wilkonson's method (maxP), Tippett's method (minP) and Aggregated Cauchy Association Test method (ACAT).
 \end{itemize}
 
 These methods can be applied directly, but it is advisable to apply 
@@ -242,7 +242,6 @@ Official Gene Symbol, Entrez or Ensembl. The inputs of this function are:
 
 \begin{itemize}
     \item \emph{objectMA}: the meta-analysis object of \textbf{DExMA} package. The result obtained by \emph{createObjectMA()} function should be used.
-    \item  \emph{initialIDs}:  a character vector with the current annotation of each dataset. Use \emph{availableIDs} function to see the annotations admitted.
     \item \emph{finalID}: a character that indicates the final gene ID that all the 
     studies will have.
     \item  \emph{organism}: a character that indicates the organism that the datasets belong to. Use \emph{avaliableOrganism} function to see the organism admitted.
@@ -258,27 +257,19 @@ rownames(newObjectMA$Study4$mExpres)[1:20]
 @
 
 
-We can use \emph{avaliableIDs} and \emph{avaliableOrganism} in order to know how to write in the function the \emph{initialIDs} vector and the organism:
+We can use \emph{avaliableIDs} and \emph{avaliableOrganism} in order to know how to write in the function the \emph{finalID} and the \emph{organism} arguments:
 
 <<>>=
 head(avaliableIDs)
 avaliableOrganism
 @
 
-We create the \emph{InitialIDs} vector:
-
-<<>>=
-annotations <-  c("Entrez","Entrez", "GeneSymbol", "GeneSymbol")
-@
-
-
 Then, we are ready to run the \emph{allSameID()} function. We are going to
 annotated all the datasets in Official Gene Symbol 
 (\emph{finalID="GeneSymbol"}):
 
 <<>>=
-newObjectMA <- allSameID(newObjectMA, initialIDs = annotations,
-                            finalID="GeneSymbol", organism = "Homo sapiens")
+newObjectMA <- allSameID(newObjectMA, finalID="GeneSymbol", organism = "Homo sapiens")
 rownames(newObjectMA$Study1$mExpres)[1:20]
 rownames(newObjectMA$Study2$mExpres)[1:20]
 rownames(newObjectMA$Study3$mExpres)[1:20]
@@ -314,13 +305,15 @@ heterogeneityTest(newObjectMA)
 
 \subsection{Imputing missing genes expression values (optional)}
 
-Optionally, the \emph{missGenesImput()} function allows to impute the expression values of the unmeasured genes. To perform this imputation, the function apply the knn method in the space of samples (\emph{sampleKnn}) \cite{2020:Mancuso}. Once the function have been applied, it returns the same \emph{objectMA} with all the datasets imputed:
+Optionally, the \emph{missGenesImput()} function allows to impute the expression values of the unmeasured genes. To perform this imputation, the function apply the knn method in the space of samples (\emph{sampleKnn}) \cite{2020:Mancuso}. Once the function have been applied, it returns the same \emph{objectMA} with all the datasets imputed
+and some imputation indicators:
 
 
 <<>>=
 nrow(newObjectMA$Study1[[1]])
 nrow(newObjectMA$Study2[[1]])
-maObject_imput <- missGenesImput(maObject, k =7)
+imputation<- missGenesImput(maObject, k =7)
+maObject_imput <- imputation$objectMA
 @
 
 If we observe the number of genes in Study1, once the imputation is performed, we can observe that it goes from having 144 genes to 175.
@@ -329,6 +322,23 @@ If we observe the number of genes in Study1, once the imputation is performed, w
 nrow(maObject_imput$Study1[[1]])
 nrow(maObject_imput$Study2[[1]])
 @
+
+In addition, the function returns some indicators to evaluate the reliability of the imputation:
+
+\itemize{
+\item imputValuesSample: Number of missing values imputed per sample
+\item imputPercentageSample: Percentage of missing values imputed per sample
+\item imputValuesGene: Number of missing values imputed per gene
+\item imputPercentageGene: Percentage of missing values imputed per gen
+}
+
+<<>>=
+head(imputation$imputValuesSample)
+head(imputation$imputPercentageSample)
+head(imputation$imputValuesGene)
+head(imputation$imputPercentageGene)
+@
+
 
 \subsection{Performing meta-analysis: \emph{metaAnalysisDE()}}
 
@@ -345,6 +355,7 @@ This function has as input:
         \item "Stouffer": Stouffer's method (sum of z-scores)
         \item "maxP": Wilkinson's method (maximun of p-values)
         \item "minP": Tippet's method (minimun of p-values)
+        \item "ACAT": Aggregated Cauchy Association Test method
     \end{itemize}
     \item missAllow: a number between 0 and 1 that indicates the maximum proportion of missing values allows in a sample. If the sample has more proportion of missing values, the sample will be eliminated. In the other case, the missing values will be imputed by using the K-NN algorithm included in \Biocpkg{impute} package \cite{Impute:2019}. In case the \emph{objectMA} has been previously imputed, this element is not necessary.
     \item proportionData: a number between 0 and 1 that indicates the minimum proportion of datasets in which a gene must be contained to be included.In case the \emph{objectMA} has been previously imputed, this element is not necessary.
@@ -395,7 +406,7 @@ head(resultsES)
 
 \subsubsection{P-value combination results}
 
-The "Fisher", "Stouffer", "minP" and "maxP" methods provide a dataframe with the  following variables:
+The "Fisher", "Stouffer", "minP", "maxP" and "ACAT" methods provide a dataframe with the  following variables:
 \begin{itemize}
     \item Stat: Statistical calculated in the method
     \item Pval: P-value of the meta-analysis for the gene.
@@ -413,7 +424,7 @@ head(resultsPV)
 
 \subsection{Visualization of the results: heatmap}
 
-Finally, we can represent in a heatmap the significant genes in order to observe how they are expressed in each of the studies. In \emph{makeHeatma()} function we have to include both the object that has been used in the meta-analysis, the result of it and the applied method. In addition, this package offers three different scaling approaches (\textit{scaling}) in order to compare properly thegene expression of the studies in the heatmap:
+Finally, we can represent in a heatmap the significant genes in order to observe how they are expressed in each of the studies. In \emph{makeHeatma()} function we have to include both the object that has been used in the meta-analysis, the result of it and the applied method. In addition, this package offers three different scaling approaches (\textit{scaling}) in order to compare properly the gene expression of the studies in the heatmap:
 
 \begin{itemize}
     \item "zscor": It calculates a z-score value for each gene, that is, the mean gene expression from each gene is subtracted from each gene expression value and then it is divided by the standard deviation.
@@ -465,11 +476,17 @@ Entrez, Official Gene Symbol or Ensembl.
 
 \subsection{Removing Batch Effects}
 
-Before the creation of the \emph{objectMA}, a batch effect correction can be applied in order to reduce the effect of covariates that may be affecting to gene expression \cite{Toro:2020}. Firstly, with function \emph{seeCov()},  which internally contains the \emph{prince()} and \emph{prince.plot()} functions of the \CRANpkg{swamp} package \cite{swampR:2019}, we can obtain a visualization of the p-values of each principal component associated with the categorical covariates. This allows to check which categorical variables are the ones that are most affecting the expression:
+Before the creation of the \emph{objectMA}, a batch effect correction can be applied in order to reduce the effect of covariates that may be affecting to gene expression \cite{Toro:2020}. Firstly, with functions \emph{prince()} and \emph{prince.plot()} function of the \CRANpkg{swamp} package \cite{swampR:2019}, we can obtain a visualization of the p-values of each principal component associated with the categorical covariates
 
 
 <<fig=TRUE>>=
-seeCov(listMatrixEX$Study2, listPhenodatas$Study2)
+library(swamp)
+pheno <- listPhenodatas$Study2
+pheno <- pheno[,apply(pheno,2,function(x) length(table(x)))>1]
+# Character variables must be converted in numeric
+pheno <- data.frame(apply(pheno, 2, factor), stringsAsFactors = TRUE) 
+res_prince <- prince(listMatrixEX$Study2, pheno,top=ncol(listMatrixEX$Study2))
+prince.plot(res_prince,note=TRUE , notecex=0.5)
 @
 
 The categorical variables that may be causing a batch effect can be corrected by using the \emph{removeBatch()} function. The input of this function is the expression matrix and the phenodata. In addition , We also have to add a formula with the variables for which we want to correct the gene expression and the name of the variable that contains the cases and controls groups. Finally, if there is a covariate inside the formula that we want to give greater importance, we will have the option to indicate in the function (\emph{mainCov()}). Here we show an example in which we have corrected the gene expression of the previous study by two of their covariates:

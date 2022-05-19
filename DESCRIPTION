@@ -1,13 +1,13 @@
 Package: DExMA
 Type: Package
 Title: Differential Expression Meta-Analysis
-Version: 1.4.0
+Version: 1.4.1
 Authors@R: c(person("Juan Antonio", "Villatoro-García", role = c("aut", "cre"), email = "juanantoniovillatorogarcia@gmail.com"), person("Pedro", "Carmona-Sáez", role = "aut"))
 Description: performing all the steps of gene expression meta-analysis considering the possible existence of missing genes. It provides the necessary functions to be able to perform the different methods of gene expression meta-analysis. In addition, it contains functions to apply quality controls, download GEO datasets and show graphical representations of the results.
 License: GPL-2
 Depends: R (>= 4.1), DExMAdata
 Suggests: BiocStyle, qpdf, BiocGenerics, RUnit
-Imports: Biobase, GEOquery, impute, limma, pheatmap, plyr, scales, snpStats, sva, swamp, stats, methods, utils, bnstruct
+Imports: Biobase, GEOquery, impute, limma, pheatmap, plyr, scales, snpStats, sva, swamp, stats, methods, utils, bnstruct, RColorBrewer, grDevices
 biocViews: DifferentialExpression, GeneExpression, StatisticalMethod, QualityControl
 Encoding: UTF-8
 LazyData: false
