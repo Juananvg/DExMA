@@ -91,7 +91,7 @@
 makeHeatmap <- function(objectMA, resMA,
     typeMethod=c("FEM", "REM", "maxP",
         "minP","Fisher",
-        "Stouffer"),
+        "Stouffer", "ACAT"),
     scaling=c("zscor","rscale","swr","none"),
     regulation=c("all", "up","down"),
     breaks=c(-2,2),
@@ -116,7 +116,7 @@ makeHeatmap <- function(objectMA, resMA,
     }
     ## Case of P-value combination
     if(typeMethod == "Fisher" |typeMethod == "Stouffer" | typeMethod == "maxP" |
-            typeMethod == "minP"){
+            typeMethod == "minP" | typeMethod == "ACAT"){
         sig.genes <- .pvalueSig(resMA, regulation, numSig, fdrSig)
     }
     ## Create a matrix with all datasets

@@ -63,6 +63,6 @@ heterogeneityTest<-function(objectMA, probs = c(0,0.25,0.5,0.75)){
     colnames(Qs) <- "Qs"
     Qs <- Qs$Qs
     qq.chisq(Qs, df=length(objectMA)-1, slope.one=TRUE,
-        main = "QQ plot heterogeneity", col.shade="white")
+        main = "QQ-plot heterogeneity", col.shade="white")
     return(quantileI2)
 }
