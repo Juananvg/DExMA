@@ -5,7 +5,7 @@
 makeHeatmap(
     objectMA,
     resMA,
-    typeMethod = c("FEM", "REM", "maxP", "minP", "Fisher", "Stouffer"),
+    typeMethod = c("FEM", "REM", "maxP", "minP", "Fisher", "Stouffer", "ACAT"),
     scaling = c("zscor", "rscale", "swr", "none"),
     regulation = c("all", "up", "down"),
     breaks = c(-2, 2),
