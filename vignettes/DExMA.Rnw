@@ -312,7 +312,7 @@ and some imputation indicators:
 <<>>=
 nrow(newObjectMA$Study1[[1]])
 nrow(newObjectMA$Study2[[1]])
-imputation<- missGenesImput(maObject, k =7)
+imputation <- missGenesImput(maObject, k =7)
 maObject_imput <- imputation$objectMA
 @
 
@@ -333,10 +333,10 @@ In addition, the function returns some indicators to evaluate the reliability of
 }
 
 <<>>=
-head(imputation$imputValuesSample)
-head(imputation$imputPercentageSample)
-head(imputation$imputValuesGene)
-head(imputation$imputPercentageGene)
+head(imputation$imputIndicators$imputValuesSample)
+head(imputation$imputIndicators$imputPercentageSample)
+head(imputation$imputIndicators$imputValuesGene)
+head(imputation$imputIndicators$imputPercentageGene)
 @
 
 
@@ -347,6 +347,9 @@ The \emph{metaAnalysisDE()} function allows to perform a meta-analysis in only o
 This function has as input: 
 \begin{itemize}
     \item objectMA: The meta-analysis object of DExMA package. The result obtained by \emph{createObjectMA} function should be used.
+    \item effectS: A list of two elements. The first element is a dataframe with genes in rows and studies in columns. Each component of the dataframe is the effect of a gene in a study. The second element of the list is also a dataframe with the same structure, but in this case each component of the dataframe represent the variance of the effect of a gene in a study. The result of the calculateES function can be used too. This argument should be only used in the case that objectMA argument is null.
+    \item pvalues: A list of two elements. The first element is a dataframe with genes in rows and studies in columns. Each component of the dataframe is the p-value of a gene in a study. The second element of the list is also a dataframe with the same structure, but in this case each component of the dataframe represent the log fold change of a gene in a study. This argument should be only used in the case that objectMA argument is null.
+    \item weight: A vector of the weights of each dataset. This argument should only be included in case objectMA is null and you want to use "Stouffer" or "ACAT" method.
     \item typeMethod: a character that indicates the method to be performed:
     \begin{itemize}
         \item "FEM": Fixed Effects model.
