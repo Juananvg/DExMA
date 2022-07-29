@@ -187,6 +187,7 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
             ncol(calESResults$ES))
     meta.res<- subset(meta.res, 
         subset = meta.res[,"propDataset"] >= proportionData)
+    meta.res <- as.data.frame(as.matrix(meta.res))
     attr(meta.res,"metaMethod") <- metaMethod
     return(meta.res)
 }
@@ -281,6 +282,7 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
     res[,5] <- meta.res$propDataset
     res<- subset(res, subset = res[,"propDataset"] > 1/ncol(p))
     res<- subset(res, subset = res[,"propDataset"] >= proportionData)
+    res <- as.data.frame(as.matrix(res))
     return(res)
 }
 

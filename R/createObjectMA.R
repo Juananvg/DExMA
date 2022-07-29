@@ -80,7 +80,8 @@ createObjectMA <- function(listEX, listPheno = NULL,
     #Obtaining the object
     container <- list(0)
     for (i in seq_len(length(listEX))) {
-        container[[i]] <- elementObjectMA(expressionMatrix=listEX[[i]],
+        container[[i]] <- elementObjectMA(
+            expressionMatrix=as.matrix(listEX[[i]]),
             pheno=listPheno[[i]],
             groupPheno=namePheno[[i]],
             expGroup=expGroups[[i]],
