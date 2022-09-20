@@ -1,0 +1,16 @@
+citHeader("To cite DExMA in publications use:")
+citEntry(
+  entry    = "Article",
+  title    = "DExMA: An R Package for Performing Gene Expression Meta-Analysis with Missing Genes",
+  author   = c("Juan Antonio Villatoro-García", "Jordi Martorell-Marugán", "Daniel Toro-Domínguez", "Yolanda Román-Montoya", "Pedro Femia", "Pedro Carmona-Sáez"),
+  journal  = "Mathematics",
+  year     = "2022",
+  volume   = "10",
+  number   = "18",
+  pages    = 3376,
+  doi = "10.3390/math10183376",
+  url  =  "https://www.mdpi.com/2227-7390/10/18/3376",
+  textVersion = paste("Juan Antonio Villatoro-García", "Jordi Martorell-Marugán", "Daniel Toro-Domínguez", "Yolanda Román-Montoya", "Pedro Femia", "Pedro Carmona-Sáez", "DExMA: An R Package for Performing Gene Expression Meta-Analysis with Missing Genes.","Mathematics (2022), 10(18), 3376, doi:10.3390/math10183376"
+
+  )
+)
