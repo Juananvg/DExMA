@@ -37,7 +37,7 @@ allSameID<- function(objectMA, finalID = "GeneSymbol",
     {stop("finalID must an object of class character")}
     if(!(finalID %in% DExMAdata::avaliableIDs)){
         stop("finalID not available")}
-    initialIDs <- .identifyIDS(objectMA)
+    initialIDs <- .identifyIDS(objectMA, organism)
     k<-length(listExpMatrix)
     newlist <- list(0)
     message("Changing IDs")
@@ -58,8 +58,9 @@ allSameID<- function(objectMA, finalID = "GeneSymbol",
 }
 
 #Fucntion to identify genes IDs
-.identifyIDS <- function(objectMA){
+.identifyIDS <- function(objectMA,organism){
     annot <- DExMAdata::IDsDExMA
+    annot <- annot[annot$Organism == organism,]
     genesName <- lapply(objectMA, function(x){return(rownames(x[[1]]))})
     ids <- NA
     for(i in seq_len(length(objectMA))){
