@@ -26,8 +26,10 @@ with genes in rows and studies in columns. Each component of the dataframe
 is the effect of a gene in a study. 
 The second element of the list is also a dataframe
 with the same structure, but in this case each component of the dataframe
-represent the variance of the effect of a gene in a study. This argument
-should be only used in the case that objectMA argument is null.}
+represent the variance of the effect of a gene in a study. The third element 
+of the list is also a dataframe with the same structure, but in this case each 
+component of the dataframe represent the log fold change of a gene in a study. 
+This argument should be only used in the case that objectMA argument is null.}
 
 \item{pvalues}{A list of two elements. The first element is a dataframe
 with genes in rows and studies in columns. Each component of the dataframe

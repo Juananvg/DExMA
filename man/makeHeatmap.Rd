@@ -12,7 +12,11 @@ makeHeatmap(
     fdrSig = 0.05,
     numSig = 50, 
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
-    na_col = "darkgrey", legend =TRUE
+    na_col = "darkgrey", legend =TRUE,
+    cluster_cols=FALSE, 
+    cluster_rows=FALSE,
+    show_rownames = TRUE,
+    show_colnames = FALSE
 )
 }
 \arguments{
@@ -53,6 +57,13 @@ Default 0.05}
 
 \item{legend}{Logical to determine if legend should be drawn or not}
 
+\item{cluster_rows}{boolean values determining if rows should be clustered.}
+
+\item{cluster_cols}{boolean values determining if columns should be clustered.}
+
+\item{show_rownames}{boolean specifying if row names are be shown.}
+
+\item{show_colnames}{boolean specifying if column names are be shown.}
 }
 \value{
 The matrix represented in the heatmap
@@ -80,7 +91,7 @@ data(DExMAExampleData)
 resultsMA <- metaAnalysisDE(maObject, typeMethod="REM")
 makeHeatmap(objectMA=maObject, resMA=resultsMA, typeMethod="REM", 
 scaling = "zscor", regulation = "all",breaks=c(-2,2), 
-fdrSig = 0.05,numSig=40)
+fdrSig = 0.05, logFCSig = 1.5, numSig=40)
 
 }
 \references{
