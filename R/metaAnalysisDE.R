@@ -10,13 +10,17 @@
 #' (controls) and 1 represents the other group (cases).
 #' The result of the CreateobjectMA can be used too.
 #' 
-#' @param effectS A list of two elements. The first element is a dataframe
+#' @param effectS A list of three elements. The first element is a dataframe
 #' with genes in rows and studies in columns. Each component of the dataframe
 #' is the effect of a gene in a study. 
 #' The second element of the list is also a dataframe
 #' with the same structure, but in this case each component of the dataframe
 #' represent the variance of the effect of a gene in a study. This argument
 #' should be only used in the case that objectMA argument is null.
+#' The third element of the list is also a dataframe
+#' with the same structure, but in this case each component of the dataframe
+#' represent the log fold change of a gene in a study. 
+#' This argument should be only used in the case that objectMA argument is null.
 #' 
 #' @param pvalues A list of two elements. The first element is a dataframe
 #' with genes in rows and studies in columns. Each component of the dataframe
@@ -146,11 +150,11 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
     K<-ncol(calESResults$ES)
     if(metaMethod == "REM"){
         print("Performing Random Effects Model")
-        res <- .getREM(calESResults$ES, calESResults$Var)
+        res <- .getREM(calESResults$ES, calESResults$Var, calESResults$logFC)
         tempFDR <- matrix(res$FDR, ncol=1)
         rownames(tempFDR) <- rownames(calESResults$ES)
         colnames(tempFDR) <- "FDR"
-        meta.res <- data.frame(matrix(0, ncol=9,
+        meta.res <- data.frame(matrix(0, ncol=10,
             nrow = length(rownames(calESResults$ES))))
         rownames(meta.res) <- rownames(calESResults$ES)
         meta.res[,1] <- res$mu.hat
@@ -161,16 +165,17 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
         meta.res[,6] <- res$zval
         meta.res[,7] <- res$pval
         meta.res[,8] <- tempFDR
-        meta.res[,9] <- as.matrix(1-rowMeans(is.na(calESResults$ES)))
+        meta.res[,9] <- res$AveFC
+        meta.res[,10] <- as.matrix(1-rowMeans(is.na(calESResults$ES)))
         colnames(meta.res) <- c("Com.ES", "ES.var", "Qval", "Qpval", "tau2",
-            "Zval", "Pval", "FDR", "propDataset")
+            "Zval", "Pval", "FDR", "AveFC" ,"propDataset")
     }else{
         print("Performing Fixed Effects Model")
-        res <- .getFEM(calESResults$ES,calESResults$Var)
+        res <- .getFEM(calESResults$ES,calESResults$Var, calESResults$logFC)
         tempFDR <- matrix(res$FDR,ncol=1)
         rownames(tempFDR) <- rownames(calESResults$ES)
         colnames(tempFDR) <- "FDR"
-        meta.res <- data.frame(matrix(0, ncol = 6,
+        meta.res <- data.frame(matrix(0, ncol = 7,
             nrow = nrow(calESResults$ES)))
         rownames(meta.res) <- rownames(calESResults$ES)
         meta.res[,1] <- res$mu.hat
@@ -178,9 +183,10 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
         meta.res[,3] <- res$zval
         meta.res[,4] <- res$pval
         meta.res[,5] <- tempFDR[,1]
-        meta.res[,6] <- as.matrix(1-rowMeans(is.na(calESResults$ES)))
+        meta.res[,6] <- res$AveFC
+        meta.res[,7] <- as.matrix(1-rowMeans(is.na(calESResults$ES)))
         colnames(meta.res) <- c("Com.ES", "ES.var", "Zval", "Pval",
-            "FDR", "propDataset")
+            "FDR", "AveFC", "propDataset")
     }
     meta.res<- subset(meta.res, 
         subset = meta.res[,"propDataset"] > 1/
@@ -193,15 +199,16 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
 }
 
 ## Fixed Effects Model (FEM)
-.getFEM <- function(em,vm){
+.getFEM <- function(em,vm,logFC){
     wt <- 1/vm
     mu.hat <- rowSums(wt*em, na.rm=TRUE)/rowSums(wt, na.rm=TRUE)
     mu.var <- 1/rowSums(wt, na.rm=TRUE)
     z.score <- mu.hat/sqrt(mu.var)
     z.p <- 2*(1-pnorm(abs(z.score)))
     qval <- p.adjust(z.p,method = "BH")
+    AveFC <- rowSums(wt*logFC, na.rm=TRUE)/rowSums(wt, na.rm=TRUE)
     res <- list(mu.hat = mu.hat,mu.var = mu.var,
-        zval = z.score,pval = z.p, FDR = qval)
+        zval = z.score,pval = z.p, FDR = qval, AveFC = AveFC)
     return(res)
 }
 
@@ -226,7 +233,7 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
     return(tau2)
 }
 ## Calculating the model
-.getREM <- function(em,vm){
+.getREM <- function(em,vm,logFC){
     k <- ncol(em)
     Q.val <- .getQ(em,vm)
     tau2 <- .getTau2(Q.val,vm,k)
@@ -237,8 +244,9 @@ metaAnalysisDE<-function(objectMA = NULL, effectS = NULL,
     z.score <- mu.hat/sqrt(mu.var)
     z.p <- 2*(1-pnorm(abs(z.score)))
     qval <- p.adjust(z.p,method="BH")
+    AveFC <- rowSums(temp.wt*logFC, na.rm=TRUE)/rowSums(temp.wt, na.rm = TRUE)
     res <- list(mu.hat = mu.hat, mu.var = mu.var, Qval = Q.val, Qpval = Qpval,
-        tau2 = tau2, zval = z.score, pval = z.p, FDR = qval)
+        tau2 = tau2, zval = z.score, pval = z.p, FDR = qval, AveFC = AveFC)
     return(res)
 }
 

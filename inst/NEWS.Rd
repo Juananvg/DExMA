@@ -2,6 +2,13 @@
 \title{DExMA News}
 \encoding{UTF-8}
 
+\section{version 1.10.1}{
+    \itemize{
+    \item Improvement of makeHeatmap function
+    \item Improvement Effects size meta-analysis methods and results
+    }
+}
+
 \section{version 1.5.1}{
     \itemize{
     \item Improvement of some functions

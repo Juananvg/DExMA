@@ -347,7 +347,7 @@ The \emph{metaAnalysisDE()} function allows to perform a meta-analysis in only o
 This function has as input: 
 \begin{itemize}
     \item objectMA: The meta-analysis object of DExMA package. The result obtained by \emph{createObjectMA} function should be used.
-    \item effectS: A list of two elements. The first element is a dataframe with genes in rows and studies in columns. Each component of the dataframe is the effect of a gene in a study. The second element of the list is also a dataframe with the same structure, but in this case each component of the dataframe represent the variance of the effect of a gene in a study. The result of the calculateES function can be used too. This argument should be only used in the case that objectMA argument is null.
+    \item effectS: A list of three elements. The first element is a dataframe with genes in rows and studies in columns. Each component of the dataframe is the effect of a gene in a study. The second element of the list is also a dataframe with the same structure, but in this case each component of the dataframe represent the variance of the effect of a gene in a study. The result of the calculateES function can be used too. The third element of the list is also a dataframe with the same structure, but in this case each component of the dataframe represent the log fold change of a gene in a study. This argument should be only used in the case that objectMA argument is null.
     \item pvalues: A list of two elements. The first element is a dataframe with genes in rows and studies in columns. Each component of the dataframe is the p-value of a gene in a study. The second element of the list is also a dataframe with the same structure, but in this case each component of the dataframe represent the log fold change of a gene in a study. This argument should be only used in the case that objectMA argument is null.
     \item weight: A vector of the weights of each dataset. This argument should only be included in case objectMA is null and you want to use "Stouffer" or "ACAT" method.
     \item typeMethod: a character that indicates the method to be performed:
@@ -399,6 +399,7 @@ The "FEM" and "REM" methods provide a dataframe with the variables:
     \item zval: combined effect value for a standard normal. I can be use in order to find out if the gene is overexpressed (positive value) or underexpressed (negative value).
     \item Pval: P-value of the meta-analysis for the gene.
     \item FDR: P-value adjusted of the meta-analysis for the gene.
+    \item AveFC: Weighted average of log Fold-Change values for the gene used in order to find out if the gene is overexpressed (positive value) or underexpressed (negative value).
     \item Prop.dataset: Proportion of the datasets in which the gene is included.
 \end{itemize}
 
@@ -414,7 +415,7 @@ The "Fisher", "Stouffer", "minP", "maxP" and "ACAT" methods provide a dataframe 
     \item Stat: Statistical calculated in the method
     \item Pval: P-value of the meta-analysis for the gene.
     \item FDR: P-value adjusted of the meta-analysis for the gene.
-    \item AveFC: Average of log Fold-Change values for the gene used in order to find out if the gene is overexpressedd (positive value) or underexpressed (negative value).
+    \item AveFC: Average of log Fold-Change values for the gene used in order to find out if the gene is overexpressed (positive value) or underexpressed (negative value).
     \item Prop.dataset: Proportion of the datasets in which the gene is included.
 \end{itemize}
 
@@ -427,7 +428,7 @@ head(resultsPV)
 
 \subsection{Visualization of the results: heatmap}
 
-Finally, we can represent in a heatmap the significant genes in order to observe how they are expressed in each of the studies. In \emph{makeHeatma()} function we have to include both the object that has been used in the meta-analysis, the result of it and the applied method. In addition, this package offers three different scaling approaches (\textit{scaling}) in order to compare properly the gene expression of the studies in the heatmap:
+Finally, we can represent in a heatmap the significant genes in order to observe how they are expressed in each of the studies. In \emph{makeHeatmap()} function we have to include both the object that has been used in the meta-analysis, the result of it and the applied method. In addition, this package offers three different scaling approaches (\textit{scaling}) in order to compare properly the gene expression of the studies in the heatmap:
 
 \begin{itemize}
     \item "zscor": It calculates a z-score value for each gene, that is, the mean gene expression from each gene is subtracted from each gene expression value and then it is divided by the standard deviation.
@@ -449,7 +450,8 @@ the result of applying a random effects model to the object "\emph{newObjectMA}"
 
 <<fig=TRUE>>=
 makeHeatmap(objectMA=newObjectMA, resMA=resultsMA, scaling = "zscor", 
-            regulation = "all", typeMethod="REM", numSig=40)
+            regulation = "all", typeMethod="REM", numSig=40,
+            fdrSig = 0.05, logFCSig = 1.5, show_rownames = TRUE)
 @
 
 \section{Additional information}
@@ -504,12 +506,13 @@ head(listMatrixEX$Study2)
 
 \subsection{Calculating Effects size}
 
-The \emph{calculateES()} function returns the effects size in each of the studies. Moreover, it calculates the variance of each of the effects and the proportion of datasets that contain the gene. The effects size are calculated by making use of the \emph{Hedges’ g estimator} \cite{Toro:2020}.
+The \emph{calculateES()} function returns the effects size in each of the studies. Moreover, it calculates the variance of each of the effects and the $log_{2}$ Fold Change. The effects size are calculated by making use of the \emph{Hedges’ g estimator} \cite{Toro:2020}.
 
 <<>>=
 effects <- calculateES(newObjectMA)
 head(effects$ES)
 head(effects$Var)
+head(effects$logFC)
 @
 
 \subsection{Calculating Individual P-values}
@@ -519,7 +522,7 @@ Similar to the calculation of effects sizes, the individual p-values of  each of
 <<>>=
 pvalues <- pvalueIndAnalysis(newObjectMA)
 head(pvalues$p)
-head(pvalues$FC)
+head(pvalues$logFC)
 @
 
 \section{Session info}

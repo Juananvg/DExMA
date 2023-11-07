@@ -24,6 +24,9 @@
 #' \item{Second element (Var) is a dataframe were columns are each of the studies
 #' (datasets) and rows are the genes. Each element of the dataframe represents
 #' the variance of the Effect size.}
+#' \item{Third element (logFC) is a dataframe were columns are each of the studies
+#' (datasets) and rows are the genes. Each element of the dataframe represents
+#' the log Fold Changes.}
 #' }
 #' @author Juan Antonio Villatoro Garcia,
 #' \email{juanantoniovillatorogarcia@@gmail.com}
@@ -59,12 +62,11 @@ calculateES <- function(objectMA, missAllow = 0.3){
     names(Variance) <- names(objectMA)
     Total.Effect <- .matrixmerge(Effect)
     Total.Var <- .matrixmerge(Variance)
+    logFC <- pvalueIndAnalysis(objectMA, missAllow = missAllow)$logFC
     Prop.dataset <- as.matrix(1-rowMeans(is.na(Total.Effect)))
-    result <- list(ES = Total.Effect, Var = Total.Var)
+    result <- list(ES = Total.Effect, Var = Total.Var, logFC = logFC)
     return(result)
 }
-
-
 
 
 

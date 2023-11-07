@@ -26,6 +26,9 @@ the Effect Size.
 \item Second element (Var) is a dataframe were columns are each of the studies
 (datasets) and rows are the genes. Each element of the dataframe represents
 the variance of the Effect size.
+\item Third element (logFC) is a dataframe were columns are each of the studies 
+(datasets) and rows are the genes. Each element of the dataframe represents
+the log Fold Changes.
 }
 }
 \description{
