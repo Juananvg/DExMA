@@ -450,7 +450,7 @@ the result of applying a random effects model to the object "\emph{newObjectMA}"
 
 <<fig=TRUE>>=
 makeHeatmap(objectMA=newObjectMA, resMA=resultsMA, scaling = "zscor", 
-            regulation = "all", typeMethod="REM", numSig=40,
+            regulation = "all", numSig=40,
             fdrSig = 0.05, logFCSig = 1.5, show_rownames = TRUE)
 @
 
