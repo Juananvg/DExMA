@@ -91,7 +91,7 @@
 #' data(DExMAExampleData)
 #'
 #' resultsMA <- metaAnalysisDE(maObject, typeMethod="REM")
-#' makeHeatmap(objectMA=maObject, resMA=resultsMA, typeMethod="REM", 
+#' makeHeatmap(objectMA=maObject,
 #' scaling = "zscor", regulation = "all",breaks=c(-2,2), 
 #' fdrSig = 0.05, logFCSig = 1.5, numSig=40)
 #'
