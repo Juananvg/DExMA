@@ -2,22 +2,22 @@
 \alias{makeHeatmap}
 \title{Visualization of the meta-analysis results}
 \usage{
-makeHeatmap(
-    objectMA,
+makeHeatmap <- function(
+    objectMA, 
     resMA,
-    typeMethod = c("FEM", "REM", "maxP", "minP", "Fisher", "Stouffer", "ACAT"),
-    scaling = c("zscor", "rscale", "swr", "none"),
-    regulation = c("all", "up", "down"),
-    breaks = c(-2, 2),
+    scaling=c("zscor","rscale","swr","none"),
+    regulation=c("all", "up","down"),
+    breaks=c(-2,2),
     fdrSig = 0.05,
-    numSig = 50, 
+    logFCSig = 1.5,
+    numSig = "all",
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
-    na_col = "darkgrey", legend =TRUE,
+    na_col = "darkgrey",
+    legend = TRUE, 
     cluster_cols=FALSE, 
     cluster_rows=FALSE,
     show_rownames = TRUE,
-    show_colnames = FALSE
-)
+    show_colnames = FALSE)
 }
 \arguments{
 \item{objectMA}{A list of list. Each list contains two elements. The first
@@ -48,7 +48,9 @@ Default 0.05}
 \item{logFCSig}{In absolute value. Log Fold Change threshold from which genes 
 are considered in the heatmap.}
 
-\item{numSig}{The number of most significant genes to be represented}
+\item{numSig}{The number of most significant genes to be represented. 
+If numSig = "all", all significant genes that meet the selected parameters will 
+be represented.}
 
 \item{color}{Vector of colors used in heatmap}
 

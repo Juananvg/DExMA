@@ -98,19 +98,19 @@
 #' @export
 
 makeHeatmap <- function(objectMA, resMA,
-                        scaling=c("zscor","rscale","swr","none"),
-                        regulation=c("all", "up","down"),
-                        breaks=c(-2,2),
-                        fdrSig = 0.05,
-                        logFCSig = 1.5,
-                        numSig = "all",
-                        color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
-                        na_col = "darkgrey",
-                        legend = TRUE, 
-                        cluster_cols=FALSE, 
-                        cluster_rows=FALSE,
-                        show_rownames = TRUE,
-                        show_colnames = FALSE){
+    scaling=c("zscor","rscale","swr","none"),
+    regulation=c("all", "up","down"),
+    breaks=c(-2,2),
+    fdrSig = 0.05,
+    logFCSig = 1.5,
+    numSig = "all",
+    color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
+    na_col = "darkgrey",
+    legend = TRUE, 
+    cluster_cols=FALSE, 
+    cluster_rows=FALSE,
+    show_rownames = TRUE,
+    show_colnames = FALSE){
   scaling<-match.arg(scaling)
   regulation<-match.arg(regulation)
   heatmap.var="none"
