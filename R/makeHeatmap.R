@@ -43,10 +43,10 @@
 #' 
 #' @param legend logical to determine if legend should be drawn or not.
 #' 
-#' @param cluster_rows boolean values determining if rows should be clustered.
-#' 
 #' @param cluster_cols boolean values determining if columns should be 
 #' clustered.
+#' 
+#' @param cluster_rows boolean values determining if rows should be clustered.
 #' 
 #' @param show_rownames boolean specifying if row names are be shown.
 #' 
@@ -97,7 +97,9 @@
 #'
 #' @export
 
-makeHeatmap <- function(objectMA, resMA,
+makeHeatmap <- function(
+    objectMA,
+    resMA,
     scaling=c("zscor","rscale","swr","none"),
     regulation=c("all", "up","down"),
     breaks=c(-2,2),
@@ -107,8 +109,8 @@ makeHeatmap <- function(objectMA, resMA,
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
     na_col = "darkgrey",
     legend = TRUE, 
-    cluster_cols=FALSE, 
-    cluster_rows=FALSE,
+    cluster_cols= FALSE, 
+    cluster_rows= FALSE,
     show_rownames = TRUE,
     show_colnames = FALSE){
   scaling<-match.arg(scaling)

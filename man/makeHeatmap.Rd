@@ -2,7 +2,7 @@
 \alias{makeHeatmap}
 \title{Visualization of the meta-analysis results}
 \usage{
-makeHeatmap <- function(
+makeHeatmap(
     objectMA, 
     resMA,
     scaling=c("zscor","rscale","swr","none"),
@@ -14,8 +14,8 @@ makeHeatmap <- function(
     color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(100),
     na_col = "darkgrey",
     legend = TRUE, 
-    cluster_cols=FALSE, 
-    cluster_rows=FALSE,
+    cluster_cols = FALSE, 
+    cluster_rows = FALSE,
     show_rownames = TRUE,
     show_colnames = FALSE)
 }
@@ -58,9 +58,9 @@ be represented.}
 
 \item{legend}{Logical to determine if legend should be drawn or not}
 
-\item{cluster_rows}{boolean values determining if rows should be clustered.}
-
 \item{cluster_cols}{boolean values determining if columns should be clustered.}
+
+\item{cluster_rows}{boolean values determining if rows should be clustered.}
 
 \item{show_rownames}{boolean specifying if row names are be shown.}
 
