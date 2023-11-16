@@ -123,7 +123,8 @@ calculateES <- function(objectMA, missAllow = 0.3){
     dprime <- d*cm
     terme1 <- 1/ntilde
     vard <- (sum(l==1)^(-1)+sum(l==2)^(-1))+(d^2)/(2*(sum(l==1)+sum(l==2)))
-    vardprime <- sum(1/n)+dprime^2/(2*sum(n))
+    #vardprime <- sum(1/n)+dprime^2/(2*sum(n))
+    vardprime = cm^2 * vard
     result <- cbind( dprime, vardprime)
     colnames(result) <- c( "dprime", "vardprime")
     rownames(result) <- rownames(y)
