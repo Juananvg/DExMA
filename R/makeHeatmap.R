@@ -122,7 +122,8 @@ makeHeatmap <- function(
     bks=NULL
   }
   #Select genes
-  logFCSig <- abs(logFCSig)
+  if(!is.null(logFCSig)){
+  logFCSig <- abs(logFCSig)}
   sig.genes <- .genesSig(resMA, regulation, numSig, fdrSig, logFCSig)
   ## Create a matrix with all datasets
   all.cl <- NULL
@@ -170,7 +171,8 @@ makeHeatmap <- function(
   if(regulation=="down"){resMA <- resMA[rownames(resMA)[resMA$AveFC<0],]}
   sig.genes <- rownames(resMA)[resMA$FDR<=fdrSig]
   if(!is.null(logFCSig)){
-    sig.genes <- rownames(resMA)[abs(resMA$AveFC)>=logFCSig]}
+    sig.genes2 <- rownames(resMA)[abs(resMA$AveFC)>=logFCSig]
+    sig.genes <- intersect(sig.genes, sig.genes2)}
   ord <- resMA[sig.genes,]
   sig.genes <- sig.genes[order(ord$FDR,decreasing = FALSE)]
   if(numSig == "all"){numSig <- length(sig.genes)}
