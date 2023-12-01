@@ -117,8 +117,13 @@ calculateES <- function(objectMA, missAllow = 0.3){
     ntilde <- 1/sum(1/n)
     m <-sum(n)-2
     cm <- cm<-1-(3/(4*sum(n)-9))
-    s <- sqrt((1/(sum(n)-2)*((y^2%*%ind)%*%diag(1/(n-1))-
-            ym^2%*%diag(n/(n-1)))%*%(n-1)))
+    #s <- sqrt((1/(sum(n)-2)*((y^2%*%ind)%*%diag(1/(n-1))-
+    #        ym^2%*%diag(n/(n-1)))%*%(n-1)))
+    numerator_s1 <- ((sum(l==2)-1) * as.matrix(apply(y[,l==2],1,var)))
+    numerator_s2 <- ((sum(l==1)-1) * as.matrix(apply(y[,l==1],1,var)))
+    numerator_s <- numerator_s1 + numerator_s2
+    denominator_s <- length(l) - 2
+    s <- sqrt(numerator_s/denominator_s)
     d <- (ym[,2]-ym[,1])/s
     dprime <- d*cm
     terme1 <- 1/ntilde
